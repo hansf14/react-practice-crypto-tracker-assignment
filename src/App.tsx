@@ -1,7 +1,9 @@
-import { createGlobalStyle } from "styled-components";
+import { ThemeProvider, createGlobalStyle } from "styled-components";
 import Router from "./Router";
 import { Helmet } from "react-helmet-async";
 import { ReactQueryDevtools } from "react-query/devtools";
+import useThemeContext from "@/hooks/useThemeContext";
+import { lightTheme } from "@/theme";
 
 /* @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap'); */
 const GlobalStyle = createGlobalStyle`
@@ -66,8 +68,9 @@ const GlobalStyle = createGlobalStyle`
     font-weight: 500;
     font-style: normal;
     
-    background-color: ${(props) => props.theme.bgColor};
-    color: ${(props) => props.theme.textColor};
+    background-color: ${({ theme }) => theme.keyColor01};
+    color: ${({ theme }) => theme.keyColor02};
+    transition: color 0.1s ease-in-out, background-color 0.3s ease-in-out;
   }
   a {
     text-decoration: none;
@@ -76,17 +79,36 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 function App() {
+	const { theme } = useThemeContext(lightTheme);
+	// console.log(theme);
+
 	return (
 		<>
-			<Helmet>
-				<link
-					href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap"
-					rel="stylesheet"
-				/>
-			</Helmet>
-			<GlobalStyle />
-			<Router />
-			<ReactQueryDevtools initialIsOpen={true} />
+			{theme ? (
+				<ThemeProvider theme={theme!}>
+					<Helmet>
+						<link
+							href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap"
+							rel="stylesheet"
+						/>
+					</Helmet>
+					<GlobalStyle />
+					<Router />
+					<ReactQueryDevtools initialIsOpen={true} />
+				</ThemeProvider>
+			) : (
+				<>
+					<Helmet>
+						<link
+							href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap"
+							rel="stylesheet"
+						/>
+					</Helmet>
+					<GlobalStyle />
+					<Router />
+					<ReactQueryDevtools initialIsOpen={true} />
+				</>
+			)}
 		</>
 	);
 }

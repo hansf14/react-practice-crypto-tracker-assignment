@@ -2,29 +2,42 @@
 import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { fetchCoins } from "../api";
+import { POPULAR_COIN_IDS, fetchCoinsInfo, fetchCoinsInfoDev } from "../api";
 import { Helmet } from "react-helmet-async";
 
 const Container = styled.div`
-	padding: 0px 20px;
-	max-width: 480px;
+	padding-top: 55px;
+	max-width: 600px;
 	margin: 0 auto;
 `;
 
 const Header = styled.header`
-	height: 10vh;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 `;
 
-const CoinsList = styled.ul``;
+const CoinsList = styled.ul`
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 10px;
+	padding: 10px 0;
+
+	@media (max-width: 600px) {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	@media (max-width: 360px) {
+		grid-template-columns: 1fr;
+	}
+`;
 
 const Coin = styled.li`
-	background-color: white;
-	color: ${(props) => props.theme.bgColor};
-	margin-bottom: 10px;
-	border-radius: 15px;
+	background-color: ${({ theme }) => theme.keyColor05};
+	border: 1px solid rgba(0, 0, 0, 0.4);
+	border-radius: 6px;
+	color: ${({ theme }) => (theme ? theme.keyColor02 : "#000")};
+	transition: color 0.1s ease-in-out, background-color 0.3s ease-in-out;
 
 	a {
 		display: flex;
@@ -35,14 +48,17 @@ const Coin = styled.li`
 
 	&:hover {
 		a {
-			color: ${(props) => props.theme.accentColor};
+			color: ${({ theme }) => (theme ? theme.keyColor07 : "#333")};
 		}
 	}
 `;
 
 const Title = styled.h1`
-	font-size: 48;
-	color: ${(props) => props.theme.accentColor};
+	margin: 100px 0 60px;
+	color: ${({ theme }) => (theme ? theme.keyColor03 : "#ffe600")};
+	transition: color 0.3s ease-in-out;
+	font-size: 40px;
+	font-weight: bold;
 `;
 
 const Loader = styled.span`
@@ -56,44 +72,43 @@ const Img = styled.img`
 	margin-right: 10px;
 `;
 
-interface ICoin {
+interface CoinMinimalInfo {
 	id: string;
 	name: string;
 	symbol: string;
-	rank: number;
-	is_new: boolean;
-	is_active: boolean;
-	type: string;
 }
 
 function Coins() {
-	// const [coins, setCoins] = useState<CoinInterface[]>([]);
-	// const [loading, setLoading] = useState(true);
-
-	// useEffect(() => {
-	// 	(async () => {
-	// 		const response = await fetch("https://api.coinpaprika.com/v1/coins");
-	// 		const json = await response.json();
-	// 		// console.log(json);
-
-	// 		setCoins(json.slice(0, 100));
-	// 		setLoading(false);
-	// 		console.log(coins);
-	// 	})();
-	// }, []);
-
-	const { isLoading, data } = useQuery<ICoin[]>("allCoins", fetchCoins, {
-		select: (data) => data.slice(0, 30),
-	});
+	const { isLoading, data } = useQuery<CoinMinimalInfo[]>(
+		["coins-list"],
+		// fetchCoinsInfo,
+		fetchCoinsInfoDev,
+		{
+			// select: (data) => data.slice(0, 30),
+			select: (data) =>
+				data.filter((coin) =>
+					// POPULAR_COIN_SYMBOLS.includes(coin.symbol.toUpperCase())
+					POPULAR_COIN_IDS.includes(coin.id)
+				),
+			staleTime: 3600 * 1000,
+			cacheTime: 3600 * 1000,
+		}
+	);
+	console.log(data);
 
 	return (
 		<Container>
 			<Helmet>
-				<title>코인</title>
-				<link rel="icon" type="image/png" href="/favicon.png" sizes="16x16" />
+				<title>Popular Coins List</title>
+				<link
+					rel="icon"
+					type="image/png"
+					href={`${process.env.PUBLIC_URL}/favicon.png`}
+					sizes="16x16"
+				/>
 			</Helmet>
 			<Header>
-				<Title>코인</Title>
+				<Title>Popular Coins List</Title>
 			</Header>
 			{isLoading ? (
 				<Loader>Loading...</Loader>
@@ -110,7 +125,9 @@ function Coins() {
 								}}
 							>
 								<Img
-									src={`https://static.coinpaprika.com/coin/${coin.id}/logo.png`}
+									src={`https://cryptofonts.com/img/icons/${
+										coin.symbol === "lunc" ? "luna" : coin.symbol
+									}.svg`}
 								/>
 								{coin.name} &rarr;
 							</Link>

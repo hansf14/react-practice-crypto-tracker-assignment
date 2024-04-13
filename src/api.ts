@@ -1,4 +1,67 @@
-const BASE_URL = "https://api.coinpaprika.com/v1";
+export const BASE_URL = "https://api.coingecko.com/api/v3/coins";
+export const POPULAR_COIN_SYMBOLS = [
+	"BTC", // Bitcoin
+	"ETH", // Ethereum
+	"BNB", // Binance Coin
+	"ADA", // Cardano
+	"SOL", // Solana
+	"DOT", // Polkadot
+	"DOGE", // Dogecoin
+	"USDT", // Tether
+	"XRP", // XRP
+	"LUNA", // Terra
+	"AVAX", // Avalanche
+	"UNI", // Uniswap
+	"LTC", // Litecoin
+	"LINK", // Chainlink
+	"MATIC", // Polygon
+	"FIL", // Filecoin
+	"BCH", // Bitcoin Cash
+	"TRX", // TRON
+	"ETC", // Ethereum Classic
+	"ALGO", // Algorand
+	"ATOM", // Cosmos
+	"XTZ", // Tezos
+	"FTT", // FTX Token
+	"EOS", // EOS
+	"AAVE", // Aave
+	"VET", // VeChain
+	"NEO", // Neo
+	"THETA", // Theta
+	"MKR", // Maker
+	"XLM", // Stellar
+];
+export const POPULAR_COIN_IDS = [
+	"bitcoin", // Bitcoin
+	"ethereum", // Ethereum
+	"binancecoin", // Binance Coin
+	"cardano", // Cardano
+	"solana", // Solana
+	"polkadot", // Polkadot
+	"dogecoin", // Dogecoin
+	"tether", // Tether
+	"ripple", // XRP
+	"terra-luna", // Terra
+	"avalanche-2", // Avalanche
+	"uniswap", // Uniswap
+	"litecoin", // Litecoin
+	"chainlink", // Chainlink
+	"polygon-matic", // Polygon
+	"filecoin", // Filecoin
+	"bitcoin-cash", // Bitcoin Cash
+	"tron", // TRON
+	"ethereum-classic", // Ethereum Classic
+	"algorand", // Algorand
+	"cosmos", // Cosmos
+	"tezos", // Tezos
+	"ftx-token", // FTX Token
+	"eos", // EOS
+	"aave", // Aave
+	"vechain", // VeChain
+	"neo", // Neo
+	"theta-token", // Theta
+	"maker", // Maker
+];
 
 // export async function fetchCoins() {
 // 	const response = await fetch("https://api.coinpaprika.com/v1/coins");
@@ -6,12 +69,40 @@ const BASE_URL = "https://api.coinpaprika.com/v1";
 // 	return json;
 // }
 
-export function fetchCoins() {
-	return fetch(`${BASE_URL}/coins`).then((response) => response.json());
+// export function fetchCoinsInfo() {
+// 	return fetch(
+// 		`${BASE_URL}/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1`,
+// 		{
+// 			mode: "no-cors",
+// 		}
+// 	).then((response) => response.json());
+// }
+
+export function fetchCoinsInfo() {
+	const options = {
+		method: "GET",
+		headers: { accept: "application/json" },
+	};
+	return fetch(`${BASE_URL}/list`, options)
+		.then((response) => response.json())
+		.catch((err) => {
+			console.error(err);
+			return fetchCoinsInfoDev(); // fallback
+		});
+}
+
+export function fetchCoinsInfoDev() {
+	const options = {
+		method: "GET",
+		headers: { accept: "application/json" },
+	};
+	return fetch("./coins-list.json", options)
+		.then((response) => response.json())
+		.catch((err) => console.error(err));
 }
 
 export function fetchCoinInfo(coinId: string) {
-	return fetch(`${BASE_URL}/coins/${coinId}`).then((response) =>
+	return fetch(`${BASE_URL}/${coinId}?localization=false`).then((response) =>
 		response.json()
 	);
 }
@@ -21,26 +112,6 @@ export function fetchCoinTickers(coinId: string) {
 		response.json()
 	);
 }
-
-// export function fetchCoinHistory(coinId: string) {
-// 	// https://api.coinpaprika.com/#tag/Coins/paths/~1coins~1%7Bcoin_id%7D~1ohlcv~1historical/get
-// 	// 우리가 언제를 기준으로 데이터를 받고 싶은지를 말하는 query parameter가 필요하다.
-// 	// ?start=2019-01-01&end=2019-01-20
-// 	// - Supported formats
-// 	//   ㄴ RFC3999 (ISO-8601) eg. 2018-02-15T05:15:00Z
-// 	//   ㄴ Simple date (yyyy-mm-dd) eg. 2018-02-15
-// 	//   ㄴ Unix timestamp (in seconds) eg. 1518671700
-// 	//
-// 	// 이제는 무료 limit는 1일 "미만"이고 그 이상은 유료화되서 하루 전 날짜 ~ 현재 동향 데이터만 가져오기로 함.
-
-// 	const endDate = Math.floor(Date.now() / 1000);
-// 	// const startDate = endDate - 60 * 60 * 24 * 7; // 1주일 전
-// 	const startDate = endDate - 60 * 60 * 24 + 60; // 하루 전 + 1분
-
-// 	return fetch(
-// 		`${BASE_URL}/coins/${coinId}/ohlcv/historical?start=${startDate}&end=${endDate}`
-// 	).then((response) => response.json());
-// }
 
 export function fetchCoinHistory(coinId: string) {
 	// Coinpaprika API 는 더이상 무료가 아닙니다. ㅠㅠ

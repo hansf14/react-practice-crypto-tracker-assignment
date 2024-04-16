@@ -1,4 +1,5 @@
 export const BASE_URL = "https://api.coingecko.com/api/v3/coins" as const;
+export const LOCAL_BASE_URL = process.env.PUBLIC_URL;
 
 export const POPULAR_COIN_SYMBOLS = [
 	"BTC", // Bitcoin
@@ -331,7 +332,7 @@ export async function fetchCoinsInfoDev() {
 		headers: { accept: "application/json" },
 	};
 	try {
-		const response = await fetch("/coins-list.json", options);
+		const response = await fetch(`${LOCAL_BASE_URL}/coins-list.json`, options);
 		if (!response.ok && response.status !== 304) {
 			throw new Error(response.status.toString());
 		}
@@ -383,7 +384,7 @@ export async function fetchCoinInfoDev({ coinId }: { coinId: string }) {
 		headers: { accept: "application/json" },
 	};
 	try {
-		const response = await fetch(`/${coinId}.json`, options);
+		const response = await fetch(`${LOCAL_BASE_URL}/${coinId}.json`, options);
 		if (!response.ok && response.status !== 304) {
 			throw new Error(response.status.toString());
 		}

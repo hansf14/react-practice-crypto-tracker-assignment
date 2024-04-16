@@ -20,8 +20,12 @@ import ErrorDescription from "@/components/ErrorDescription";
 import { dateStringToEpochTime, formatDate } from "@/utils/formatDate";
 import useUniqueRandomIds from "@/hooks/useUniqueRandomIds";
 import useBeforeRender from "@/hooks/useBeforeRender";
-import MasonryGrid from "@/components/MasonryGrid";
-import { MasonryGridItem } from "@/components/MasonryGrid/styles";
+import {
+	default as MasonryGridComponent,
+	MasonryGridCustomAttributes,
+	MasonryGridItem as MasonryGridItemComponent,
+} from "@/components/MasonryGrid";
+import { formatNumber } from "@/utils/formatNumber";
 
 const Header = styled(HeaderBase)`
 	gap: 10px;
@@ -73,14 +77,40 @@ const OverviewContainer = styled.div`
 	}
 `;
 
-const titleCommonCss = css`
+const TitleCommonCss = css`
 	margin: 7px 0 15px;
 	font-size: 20px;
 	font-weight: bold;
 `;
 
+const NestedList = styled.ul`
+	margin-left: 10px;
+`;
+
+const NestedListItem = styled.li`
+	display: flex;
+	line-height: 1.2;
+
+	&::before {
+		display: block;
+		content: "";
+
+		margin-top: calc(calc(calc(0.5lh + 0.5cap + 0.5em) / 3) - 2px);
+		margin-right: 7px;
+
+		background-color: ${({ theme }) =>
+			theme.nestedListDecoratorColor ? theme.nestedListDecoratorColor : "#000"};
+		width: 4px;
+		height: 4px;
+		max-width: 4px;
+		min-width: 4px;
+		max-height: 4px;
+		min-height: 4px;
+	}
+`;
+
 const OverviewTitle = styled.h2`
-	${titleCommonCss}
+	${TitleCommonCss}
 	color: ${({ theme }) => (theme.keyColor03 ? theme.keyColor03 : "#000")};
 `;
 
@@ -127,9 +157,10 @@ const OverviewDetail = styled.ul.withConfig({
 	}
 `;
 
-const OverviewDetailItem = styled.li`
+const ListItemCss = css`
 	font-size: 13px;
 	font-weight: bold;
+	line-height: 1.2;
 
 	span:first-child {
 		margin-right: 3px;
@@ -138,17 +169,109 @@ const OverviewDetailItem = styled.li`
 	}
 `;
 
-const NestedList = styled.ul`
-	margin-top: 5px;
-	margin-left: 10px;
+const ListItemFlexCss = css`
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
 
-	${OverviewDetailItem}:has(&) {
-		display: flex;
-		flex-direction: column;
+	& > span:first-child {
+		margin-right: 0;
 	}
 `;
 
-const NestedListItem = styled.li``;
+const OverviewDetailItem = styled.li`
+	${ListItemCss}
+
+	&:has(${NestedList}) {
+		${ListItemFlexCss}
+	}
+`;
+
+const MasonryGridItem = styled(MasonryGridItemComponent)`
+	${ListItemCss}
+`;
+
+const MasonryGridItemFlex = styled(MasonryGridItem)`
+	${ListItemFlexCss}
+`;
+
+const MasonryGrid = styled(MasonryGridComponent)`
+	${({ customProps }) => {
+		return `
+		[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"] ${MasonryGridItemFlex} {
+			align-items: flex-start;
+
+			${NestedList} {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+
+				margin-left: 0;
+			}
+		}
+
+		[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"] ${MasonryGridItem} {
+			text-align: left;
+
+			${NestedList} {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+
+				margin-left: 0;
+			}
+		}
+
+		:not(:is([${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"], [${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"])) ${MasonryGridItemFlex} {
+			align-items: center;
+
+			${NestedList} {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+
+				margin-left: 0;
+			}
+		}
+
+		:not(:is([${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"], [${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"])) ${MasonryGridItem} {
+			text-align: center;
+
+			${NestedList} {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+
+				margin-left: 0;
+			}
+		}
+
+		[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"]  ${MasonryGridItemFlex} {
+			align-items: flex-end;
+
+			${NestedList} {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-end;
+
+				margin-left: 0;
+			}
+		}
+
+		[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"]  ${MasonryGridItem} {
+			text-align: right;
+
+			${NestedList} {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-end;
+
+				margin-left: 0;
+			}
+		}
+	`;
+	}}
+`;
 
 const DescriptionContainer = styled(OverviewContainer)`
 	background-color: ${({ theme }) =>
@@ -156,7 +279,7 @@ const DescriptionContainer = styled(OverviewContainer)`
 `;
 
 const DescriptionTitle = styled.h2`
-	${titleCommonCss}
+	${TitleCommonCss}
 `;
 
 const Description = styled.p`
@@ -209,7 +332,7 @@ function Coin() {
 	>(
 		["info", coinId],
 		() =>
-			// fetchCoinInfo(coinId)
+			// fetchCoinInfo({ coinId }),
 			fetchCoinInfoDev({ coinId }),
 		{
 			staleTime: 3600 * 1000,
@@ -223,20 +346,85 @@ function Coin() {
 	const chartMatch = useRouteMatch("/:coinId/chart");
 	// console.log(chartMatch);
 
-	let date: string | null = null;
-	let time: string | null = null;
-	if (data) {
-		const epochTime = dateStringToEpochTime(data.last_updated);
-		const { formattedDate, formattedTime } = formatDate(epochTime);
-		date = formattedDate;
-		time = formattedTime;
-	}
-
-	const bitcoinForumLink = data?.links.bitcointalk_thread_identifier
-		? `https://bitcointalk.org/index.php?topic=${data.links.bitcointalk_thread_identifier}`
+	const faviconSrcUrl = data?.symbol
+		? `https://cryptofonts.com/img/icons/${
+				data.symbol === "lunc" ? "luna" : data.symbol
+		  }.svg`
+		: `${process.env.PUBLIC_URL}/favicon.png`;
+	const logoSrcUrl = data?.symbol
+		? `https://cryptofonts.com/img/icons/${
+				data.symbol === "lunc" ? "luna" : data.symbol
+		  }.svg`
 		: null;
 
-	const githubRepoLinks = data?.links.repos_url.github ?? null;
+	let formattedLastUpdatedDate: string | null = null;
+	let formattedLastUpdatedTime: string | null = null;
+	if (data?.last_updated) {
+		const epochTime = dateStringToEpochTime(data.last_updated);
+		const { formattedDate, formattedTime } = formatDate(epochTime);
+		formattedLastUpdatedDate = formattedDate;
+		formattedLastUpdatedTime = formattedTime;
+	}
+
+	const formattedMarketCapRank =
+		typeof data?.market_cap_rank === "number"
+			? formatNumber(data.market_cap_rank)
+			: "Unknown";
+
+	const symbol = data?.symbol ?? "Unknown";
+
+	const formattedCurrentPriceUsd =
+		typeof data?.market_data.current_price.usd === "number"
+			? `$${formatNumber(
+					parseFloat(data.market_data.current_price.usd.toFixed(3))
+			  )}`
+			: "Unknown";
+
+	const formattedTwitterFollowerCnt =
+		typeof data?.community_data.twitter_followers === "number"
+			? formatNumber(data.community_data.twitter_followers)
+			: "Unknown";
+
+	const formattedTelegramUserCnt =
+		typeof data?.community_data.telegram_channel_user_count === "number"
+			? formatNumber(data.community_data.telegram_channel_user_count)
+			: "Unknown";
+
+	const formattedFacebookLikeCnt =
+		typeof data?.community_data.facebook_likes === "number"
+			? formatNumber(data.community_data.facebook_likes)
+			: "Unknown";
+
+	const formattedGithubStarCnt =
+		typeof data?.developer_data.stars === "number"
+			? formatNumber(data.developer_data.stars)
+			: "Unknown";
+
+	const formattedGithubForkCnt =
+		typeof data?.developer_data.forks === "number"
+			? formatNumber(data.developer_data.forks)
+			: "Unknown";
+
+	const formattedGithubIssueCnt =
+		typeof data?.developer_data.total_issues === "number"
+			? formatNumber(data.developer_data.total_issues)
+			: "Unknown";
+
+	const descriptionEn = data?.description.en ?? null;
+
+	const hompages = data?.links.homepage ?? null;
+
+	const bitcoinForumLink =
+		typeof data?.links.bitcointalk_thread_identifier === "number"
+			? `https://bitcointalk.org/index.php?topic=${data.links.bitcointalk_thread_identifier}`
+			: null;
+
+	const githubRepoLinks =
+		!data?.links.repos_url.github ||
+		data.links.repos_url.github.length === 0 ||
+		data.links.repos_url.github.every((link) => link === "")
+			? null
+			: data.links.repos_url.github;
 	const {
 		ids: githubRepoLinkKeys,
 		keepOrExpandIds: keepOrExpandGithubRepoLinkKeys,
@@ -246,7 +434,13 @@ function Coin() {
 		keepOrExpandGithubRepoLinkKeys(githubRepoLinks?.length ?? 0);
 	}, [githubRepoLinks?.length]);
 
-	const bitbucketRepoLinks = data?.links.repos_url.bitbucket ?? null;
+	const bitbucketRepoLinks =
+		!data?.links.repos_url.bitbucket ||
+		data.links.repos_url.bitbucket.length === 0 ||
+		data.links.repos_url.bitbucket.every((link) => link === "")
+			? null
+			: data.links.repos_url.bitbucket;
+
 	const {
 		ids: bitbucketRepoLinkKeys,
 		keepOrExpandIds: keepOrExpandBitbucketRepoLinkKeys,
@@ -256,7 +450,13 @@ function Coin() {
 		keepOrExpandBitbucketRepoLinkKeys(bitbucketRepoLinks?.length ?? 0);
 	}, [bitbucketRepoLinks?.length]);
 
-	const blockchainSites = data?.links.blockchain_site ?? null;
+	const blockchainSites =
+		!data?.links.blockchain_site ||
+		data.links.blockchain_site.length === 0 ||
+		data.links.blockchain_site.every((link) => link === "")
+			? null
+			: data.links.blockchain_site;
+
 	const {
 		ids: blockchainSiteKeys,
 		keepOrExpandIds: keepOrExpandBlockchainSiteKeys,
@@ -266,42 +466,34 @@ function Coin() {
 		keepOrExpandBlockchainSiteKeys(blockchainSites?.length ?? 0);
 	}, [blockchainSites?.length]);
 
-	const overviewDetailColumnGap = "20px";
-	const overviewDetailRowGap = "10px";
+	const columnGap = "20px";
+	const rowGap = "7px";
 
 	return (
 		<Container>
 			<Helmet>
 				<title>
-					{state?.name ? state.name : isLoading ? "Loading..." : data?.name}
+					{state?.name
+						? state.name
+						: isLoading
+						? "Loading..."
+						: data?.name ?? "Error"}
 				</title>
-				<link
-					rel="icon"
-					type="image/png"
-					href={
-						data
-							? `https://cryptofonts.com/img/icons/${
-									data.symbol === "lunc" ? "luna" : data.symbol
-							  }.svg`
-							: `${process.env.PUBLIC_URL}/favicon.png`
-					}
-					sizes="16x16"
-				/>
+				<link rel="icon" type="image/png" href={faviconSrcUrl} sizes="16x16" />
 			</Helmet>
 			<Header>
 				<Title>
-					{state?.name ? state.name : isLoading ? "Loading..." : data?.name}
+					{state?.name
+						? state.name
+						: isLoading
+						? "Loading..."
+						: data?.name ?? "Error"}
 				</Title>
-				<LogoContainer>
-					<Logo
-						src={
-							data &&
-							`https://cryptofonts.com/img/icons/${
-								data.symbol === "lunc" ? "luna" : data.symbol
-							}.svg`
-						}
-					/>
-				</LogoContainer>
+				{logoSrcUrl && (
+					<LogoContainer>
+						<Logo src={logoSrcUrl} />
+					</LogoContainer>
+				)}
 			</Header>
 			{isLoading ? (
 				<Loader>Loading...</Loader>
@@ -312,7 +504,9 @@ function Coin() {
 					<LastUpdatedContainer>
 						<LastUpdatedTitle>Last Update: </LastUpdatedTitle>
 						<LastUpdatedDetail>
-							{date && time ? `${date} ${time}` : "Unknown"}
+							{formattedLastUpdatedDate && formattedLastUpdatedTime
+								? `${formattedLastUpdatedDate} ${formattedLastUpdatedTime}`
+								: "Unknown"}
 						</LastUpdatedDetail>
 					</LastUpdatedContainer>
 					<OverviewContainer>
@@ -320,23 +514,21 @@ function Coin() {
 						<OverviewDetail
 							customProps={{
 								columnCnt: 3,
-								columnGap: overviewDetailColumnGap,
-								rowGap: overviewDetailRowGap,
+								columnGap: columnGap,
+								rowGap: rowGap,
 							}}
 						>
 							<OverviewDetailItem>
 								<span>Rank: </span>
-								<span>{data?.market_cap_rank ?? "Unknown"}</span>
+								<span>{formattedMarketCapRank}</span>
 							</OverviewDetailItem>
 							<OverviewDetailItem>
 								<span>Symbol: </span>
-								<span>{data?.symbol ?? "Unknown"}</span>
+								<span>{symbol}</span>
 							</OverviewDetailItem>
 							<OverviewDetailItem>
 								<span>Price: </span>
-								<span>
-									${data?.market_data.current_price.usd.toFixed(3) ?? "Unknown"}
-								</span>
+								<span>{formattedCurrentPriceUsd}</span>
 							</OverviewDetailItem>
 						</OverviewDetail>
 					</OverviewContainer>
@@ -346,135 +538,144 @@ function Coin() {
 						<OverviewDetail
 							customProps={{
 								columnCnt: 2,
-								columnGap: overviewDetailColumnGap,
-								rowGap: overviewDetailRowGap,
+								columnGap,
+								rowGap,
 							}}
 						>
 							<OverviewDetailItem>
 								<span>Twitter Followers: </span>
-								<span>
-									{data?.community_data.twitter_followers ?? "Unknown"}
-								</span>
+								<span>{formattedTwitterFollowerCnt}</span>
 							</OverviewDetailItem>
 							<OverviewDetailItem>
 								<span>Telegram Channel User Count: </span>
-								<span>
-									{data?.community_data.telegram_channel_user_count ??
-										"Unknown"}
-								</span>
+								<span>{formattedTelegramUserCnt}</span>
+							</OverviewDetailItem>
+							<OverviewDetailItem>
+								<span>Facebook Likes: </span>
+								<span>{formattedFacebookLikeCnt}</span>
 							</OverviewDetailItem>
 						</OverviewDetail>
 					</OverviewContainer>
 
 					<OverviewContainer>
 						<OverviewTitle>Code</OverviewTitle>
-						<OverviewDetail
+						<MasonryGrid
 							customProps={{
 								columnCnt: 2,
-								columnGap: overviewDetailColumnGap,
-								rowGap: overviewDetailRowGap,
+								columnGap,
+								rowGap,
 							}}
 						>
-							<OverviewDetailItem>
-								<span>Github Repositories: </span>
-								{githubRepoLinks && githubRepoLinks.length !== 0 ? (
+							{githubRepoLinks ? (
+								<MasonryGridItemFlex>
+									<span>Github Repositories</span>
 									<NestedList>
-										{githubRepoLinks.map((link, idx) => (
-											<NestedListItem key={githubRepoLinkKeys[idx]}>
-												<a href={link}>{link}</a>
-											</NestedListItem>
-										))}
+										{githubRepoLinks.map(
+											(link, idx) =>
+												link !== "" && (
+													<NestedListItem key={githubRepoLinkKeys[idx]}>
+														<a href={link}>{link}</a>
+													</NestedListItem>
+												)
+										)}
 									</NestedList>
-								) : (
+								</MasonryGridItemFlex>
+							) : (
+								<MasonryGridItem>
+									<span>Github Repositories: </span>
 									<span>Unknown</span>
-								)}
-							</OverviewDetailItem>
-							<OverviewDetailItem>
+								</MasonryGridItem>
+							)}
+							<MasonryGridItem>
 								<span>Github Stars: </span>
-								<span>{data?.developer_data.stars ?? "Unknown"}</span>
-							</OverviewDetailItem>
-							<OverviewDetailItem>
-								<span>Github Subscribers: </span>
-								<span>{data?.developer_data.subscribers ?? "Unknown"}</span>
-							</OverviewDetailItem>
-							<OverviewDetailItem>
+								<span>{formattedGithubStarCnt}</span>
+							</MasonryGridItem>
+							<MasonryGridItem>
 								<span>Github Forks: </span>
-								<span>{data?.developer_data.forks ?? "Unknown"}</span>
-							</OverviewDetailItem>
-							<OverviewDetailItem>
+								<span>{formattedGithubForkCnt}</span>
+							</MasonryGridItem>
+							<MasonryGridItem>
 								<span>Github Issues: </span>
-								<span>{data?.developer_data.total_issues ?? "Unknown"}</span>
-							</OverviewDetailItem>
-							<OverviewDetailItem>
-								<span>Bitbucket Repositories: </span>
-								{bitbucketRepoLinks && bitbucketRepoLinks.length !== 0 ? (
+								<span>{formattedGithubIssueCnt}</span>
+							</MasonryGridItem>
+							{bitbucketRepoLinks ? (
+								<MasonryGridItemFlex>
+									<span>Bitbucket Repositories</span>
 									<NestedList>
-										{bitbucketRepoLinks.map((link, idx) => (
-											<NestedListItem key={bitbucketRepoLinkKeys[idx]}>
-												<a href={link}>{link}</a>
-											</NestedListItem>
-										))}
+										{bitbucketRepoLinks.map(
+											(link, idx) =>
+												link !== "" && (
+													<NestedListItem key={bitbucketRepoLinkKeys[idx]}>
+														<a href={link}>{link}</a>
+													</NestedListItem>
+												)
+										)}
 									</NestedList>
-								) : (
+								</MasonryGridItemFlex>
+							) : (
+								<MasonryGridItem>
+									<span>Bitbucket Repositories: </span>
 									<span>Unknown</span>
-								)}
-							</OverviewDetailItem>
-						</OverviewDetail>
+								</MasonryGridItem>
+							)}
+						</MasonryGrid>
 					</OverviewContainer>
 
-					{data?.description.en && (
+					{descriptionEn && (
 						<DescriptionContainer>
 							<DescriptionTitle>Description</DescriptionTitle>
-							<Description>{data.description.en}</Description>
+							<Description>{descriptionEn}</Description>
 						</DescriptionContainer>
 					)}
 
 					<OverviewContainer>
 						<OverviewTitle>Links</OverviewTitle>
-						<MasonryGrid customProps={{ columnCnt: 2, rowGap: "20px" }}>
-							<MasonryGridItem>
-								{bitcoinForumLink ? (
-									<>
-										<span>Bitcoin Forum </span>
-										<NestedList>
-											<a href={bitcoinForumLink}>{bitcoinForumLink}</a>
-										</NestedList>
-									</>
-								) : (
-									<>
-										<span>Bitcoin Forum: </span>
-										<span>Unknown</span>
-									</>
-								)}
-							</MasonryGridItem>
-							{/* Blockchain Sites */}
-							<MasonryGridItem>
-								{blockchainSites && blockchainSites.length !== 0 ? (
-									<>
-										<span>Blockchain Sites </span>
-										<NestedList>
-											{blockchainSites.map((link, idx) => (
-												<NestedListItem key={blockchainSiteKeys[idx]}>
-													<a href={link}>{link}</a>
-												</NestedListItem>
-											))}
-										</NestedList>
-									</>
-								) : (
-									<>
-										<span>Blockchain Sites: </span>
-										<span>Unknown</span>
-									</>
-								)}
-							</MasonryGridItem>
-							{/* Facebook */}
-							{/* Chat */}
+						<MasonryGrid customProps={{ columnCnt: 2, columnGap, rowGap }}>
 							{/* Homepage */}
-							{/*  */}
-							<MasonryGridItem>
-								<span>Github Subscribers: </span>
-								<span>{data?.developer_data.subscribers ?? "Unknown"}</span>
-							</MasonryGridItem>
+							{/* official forum */}
+							{bitcoinForumLink ? (
+								<MasonryGridItemFlex>
+									<span>Bitcoin Forum </span>
+									<NestedList>
+										<NestedListItem>
+											<a href={bitcoinForumLink}>{bitcoinForumLink}</a>
+										</NestedListItem>
+									</NestedList>
+								</MasonryGridItemFlex>
+							) : (
+								<MasonryGridItem>
+									<span>Bitcoin Forum: </span>
+									<span>Unknown</span>
+								</MasonryGridItem>
+							)}
+							{/* Facebook */}
+							{/* twitter */}
+							{/* reddit */}
+							{/* Chat */}
+							{/* telegram */}
+							{/* whitepaper */}
+
+							{blockchainSites ? (
+								<MasonryGridItemFlex>
+									<span>Blockchain Sites </span>
+									<NestedList>
+										{blockchainSites.map(
+											(link, idx) =>
+												link !== "" && (
+													<NestedListItem key={blockchainSiteKeys[idx]}>
+														<a href={link}>{link}</a>
+													</NestedListItem>
+												)
+										)}
+									</NestedList>
+								</MasonryGridItemFlex>
+							) : (
+								<MasonryGridItem>
+									<span>Blockchain Sites: </span>
+									<span>Unknown</span>
+								</MasonryGridItem>
+							)}
+							{/* <MasonryGridItem></MasonryGridItem> */}
 						</MasonryGrid>
 					</OverviewContainer>
 
@@ -482,8 +683,8 @@ function Coin() {
 						<OverviewDetail
 							customProps={{
 								columnCnt: 2,
-								columnGap: overviewDetailColumnGap,
-								rowGap: overviewDetailRowGap,
+								columnGap: columnGap,
+								rowGap: rowGap,
 							}}
 						>
 							<OverviewDetailItem>

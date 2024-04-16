@@ -3,26 +3,36 @@ import React, {
 	useImperativeHandle,
 	useLayoutEffect,
 	useRef,
+	useState,
 } from "react";
 import flattenChildren from "react-keyed-flatten-children";
 import {
 	MasonryGridBaseElement,
+	MasonryGridCustomAttributes,
 	MasonryGridHandle,
 	MasonryGridProps,
 } from "./types";
 import * as Styles from "./styles";
 import useUniqueRandomIds from "@/hooks/useUniqueRandomIds";
 import useBeforeRender from "@/hooks/useBeforeRender";
+export * from "./types";
+export { MasonryGridItem } from "./styles";
 
 const MasonryGrid = React.memo(
 	React.forwardRef<MasonryGridHandle, MasonryGridProps>(
 		({ customProps, children, ...otherProps }, ref) => {
 			const columnCnt = customProps.columnCnt;
-			const columnGap = customProps.columnGap;
-			const rowGap = customProps.rowGap;
+			const columnGap = customProps.columnGap ?? "0";
+			const rowGap = customProps.rowGap ?? "0";
 
-			const gridRootElementRef = useRef<MasonryGridBaseElement | null>(null);
-			const gridElementRef = useRef<HTMLDivElement | null>(null);
+			const separatorCnt = columnCnt - 1;
+
+			const gridBaseElementRef = useRef<MasonryGridBaseElement | null>(null);
+			const gridInternalComponentBaseElementRef = useRef<HTMLDivElement | null>(
+				null
+			);
+
+			const rerender = useState<number>(0)[1];
 
 			const { ids: separatorKeys, keepOrExpandIds: keepOrExpandSeparatorKeys } =
 				useUniqueRandomIds(columnCnt - 1);
@@ -31,8 +41,12 @@ const MasonryGrid = React.memo(
 				keepOrExpandSeparatorKeys(columnCnt - 1 ?? 0);
 			}, [columnCnt]);
 
+			const arrIsSeparatorNeededRef = useRef<boolean[]>(
+				new Array(separatorCnt).fill(false)
+			);
+
 			const flattenedChildren = flattenChildren(children);
-			console.log(flattenedChildren);
+			// console.log(flattenedChildren);
 
 			const {
 				ids: tempFlattenedChildrenKeys,
@@ -52,37 +66,42 @@ const MasonryGrid = React.memo(
 
 			useImperativeHandle(ref, () => {
 				return {
-					rootElement: gridRootElementRef.current,
-					gridElement: gridElementRef.current,
+					gridBaseElement: gridBaseElementRef.current,
+					gridInternalComponentBaseElement:
+						gridInternalComponentBaseElementRef.current,
 				};
 			});
 
 			const layout = useCallback(() => {
-				const gridElement = gridElementRef.current;
-				const gridRootElement = gridRootElementRef.current;
-				if (!gridElement || !gridRootElement) {
+				const gridInternalComponentBaseElement =
+					gridInternalComponentBaseElementRef.current;
+				const gridBaseElement = gridBaseElementRef.current;
+				if (!gridInternalComponentBaseElement || !gridBaseElement) {
 					return;
 				}
 
 				// console.log("[layout]");
 
 				let itemCnt = 0;
-				const separatorCnt = columnCnt - 1;
 				const columnHeights: number[] = [];
 				for (let col = 1; col <= columnCnt; col++) {
 					columnHeights[col - 1] =
-						gridElement.children[col - 1].getBoundingClientRect().height;
-					(gridElement.children[col - 1] as HTMLElement).style.setProperty(
-						"order",
+						gridInternalComponentBaseElement.children[
+							col - 1
+						].getBoundingClientRect().height;
+					(
+						gridInternalComponentBaseElement.children[col - 1] as HTMLElement
+					).setAttribute(
+						MasonryGridCustomAttributes.dataMasonryGridColumnNumber,
 						col.toString()
 					);
 
 					itemCnt++;
 				}
-				// console.log(columnHeights);
 
-				const rowGapHeightRaw =
-					getComputedStyle(gridElement).getPropertyValue("row-gap");
+				const rowGapHeightRaw = getComputedStyle(
+					gridInternalComponentBaseElement
+				).getPropertyValue("row-gap");
 				const rowGapHeight =
 					rowGapHeightRaw === "" ? 0 : parseFloat(rowGapHeightRaw);
 				// console.log(rowGapHeightRaw);
@@ -90,7 +109,8 @@ const MasonryGrid = React.memo(
 
 				for (
 					;
-					itemCnt < gridElement.children.length - separatorCnt;
+					itemCnt <
+					gridInternalComponentBaseElement.children.length - separatorCnt;
 					itemCnt++
 				) {
 					const minHeight = Math.min(...columnHeights);
@@ -99,10 +119,12 @@ const MasonryGrid = React.memo(
 					);
 
 					const currentItemStyle = getComputedStyle(
-						gridElement.children[itemCnt]
+						gridInternalComponentBaseElement.children[itemCnt]
 					);
 					const currentItemHeight =
-						gridElement.children[itemCnt].getBoundingClientRect().height;
+						gridInternalComponentBaseElement.children[
+							itemCnt
+						].getBoundingClientRect().height;
 					const currentItemMarginTopRaw =
 						currentItemStyle.getPropertyValue("margin-top");
 					const currentItemMarginTop =
@@ -116,60 +138,93 @@ const MasonryGrid = React.memo(
 							? 0
 							: parseFloat(currentItemMarginBottomRaw);
 
-					(gridElement.children[itemCnt] as HTMLElement).style.setProperty(
-						"order",
+					(
+						gridInternalComponentBaseElement.children[itemCnt] as HTMLElement
+					).setAttribute(
+						MasonryGridCustomAttributes.dataMasonryGridColumnNumber,
 						(minHeightColumnIdx + 1).toString()
 					);
+
+					// console.log("itemCnt:", itemCnt);
+					// console.log("minHeightColumnIdx:", minHeightColumnIdx);
+
 					columnHeights[minHeightColumnIdx] +=
 						rowGapHeight +
 						currentItemHeight +
 						currentItemMarginTop +
 						currentItemMarginBottom;
-				}
 
-				for (
-					let separator = 1;
-					separator <= separatorCnt;
-					separator++, itemCnt++
-				) {
-					(gridElement.children[itemCnt] as HTMLElement).style.setProperty(
-						"order",
-						separator.toString()
-					);
+					// console.log(columnHeights);
 				}
 
 				const maxHeight = Math.max(...columnHeights);
-				const gridElementStyle = getComputedStyle(gridElement);
-				const gridElementPaddingTopRaw =
-					gridElementStyle.getPropertyValue("padding-top");
-				const gridElementPaddingTop =
-					gridElementPaddingTopRaw === ""
-						? 0
-						: parseFloat(gridElementPaddingTopRaw);
-				const gridElementPaddingBottomRaw =
-					gridElementStyle.getPropertyValue("padding-top");
-				const gridElementPaddingBottom =
-					gridElementPaddingBottomRaw === ""
-						? 0
-						: parseFloat(gridElementPaddingBottomRaw);
-				const gridElementHeight =
-					maxHeight + gridElementPaddingTop + gridElementPaddingBottom;
-
-				// console.log("columnHeights:", columnHeights);
-				// console.log("gridElementHeight:", gridElementHeight);
-
-				gridElement.style.setProperty("height", `${gridElementHeight}px`);
-				gridRootElement.style.setProperty(
-					"min-height",
-					`${gridElementHeight}px`
+				const gridInternalComponentBaseElementStyle = getComputedStyle(
+					gridInternalComponentBaseElement
 				);
-			}, [columnCnt]);
+				const gridInternalComponentBaseElementPaddingTopRaw =
+					gridInternalComponentBaseElementStyle.getPropertyValue("padding-top");
+				const gridInternalComponentBaseElementPaddingTop =
+					gridInternalComponentBaseElementPaddingTopRaw === ""
+						? 0
+						: parseFloat(gridInternalComponentBaseElementPaddingTopRaw);
+				const gridInternalComponentBaseElementPaddingBottomRaw =
+					gridInternalComponentBaseElementStyle.getPropertyValue("padding-top");
+				const gridInternalComponentBaseElementPaddingBottom =
+					gridInternalComponentBaseElementPaddingBottomRaw === ""
+						? 0
+						: parseFloat(gridInternalComponentBaseElementPaddingBottomRaw);
+				const gridInternalComponentBaseElementHeight =
+					maxHeight +
+					gridInternalComponentBaseElementPaddingTop +
+					gridInternalComponentBaseElementPaddingBottom;
+
+				gridInternalComponentBaseElement.style.setProperty(
+					"height",
+					`${gridInternalComponentBaseElementHeight}px`
+				);
+				gridBaseElement.style.setProperty(
+					"min-height",
+					`${gridInternalComponentBaseElementHeight}px`
+				);
+
+				for (let col = 1; col <= separatorCnt; col++) {
+					// console.log(
+					// 	"[1]:",
+					// 	Math.round(columnHeights[col - 1] + 2 * rowGapHeight)
+					// );
+					// console.log("[2] maxHeight:", Math.round(maxHeight));
+
+					arrIsSeparatorNeededRef.current[col - 1] =
+						Math.round(columnHeights[col - 1] + 2 * rowGapHeight) <
+						Math.round(maxHeight)
+							? true
+							: false;
+				}
+
+				for (
+					let separatorNumber = 1;
+					separatorNumber <= separatorCnt;
+					separatorNumber++
+				) {
+					(
+						gridInternalComponentBaseElement.children[
+							itemCnt + separatorNumber - 1
+						] as HTMLElement
+					).setAttribute(
+						MasonryGridCustomAttributes.dataMasonryGridColumnNumber,
+						separatorNumber.toString()
+					);
+				}
+
+				// console.log(arrIsSeparatorNeededRef.current);
+				rerender((prev) => (prev > 1000 ? 0 : prev + 1));
+			}, [columnCnt, separatorCnt, rerender]);
 
 			useLayoutEffect(() => {
-				const gridElement = (
-					gridElementRef as React.RefObject<HTMLDivElement | null>
+				const gridInternalComponentBaseElement = (
+					gridInternalComponentBaseElementRef as React.RefObject<HTMLDivElement | null>
 				).current;
-				if (!gridElement) {
+				if (!gridInternalComponentBaseElement) {
 					return;
 				}
 
@@ -179,10 +234,10 @@ const MasonryGrid = React.memo(
 					animationFrame = requestAnimationFrame(layout);
 				});
 				if (resizeObserver) {
-					([...gridElement.children] as HTMLElement[]).forEach((child) =>
-						resizeObserver.observe(child)
-					);
-					resizeObserver.observe(gridElement);
+					(
+						[...gridInternalComponentBaseElement.children] as HTMLElement[]
+					).forEach((child) => resizeObserver.observe(child));
+					resizeObserver.observe(gridInternalComponentBaseElement);
 				}
 
 				layout();
@@ -193,13 +248,14 @@ const MasonryGrid = React.memo(
 					}
 					resizeObserver?.disconnect();
 				};
-			}, [flattenedChildren, layout]);
-			// }, [ref, itemsPerRow]);
+			}, [layout]);
+
+			// console.log(arrIsSeparatorNeededRef.current);
 
 			return (
-				<Styles.MasonryGridRootElement ref={gridRootElementRef}>
-					<Styles.MasonryGridElement
-						ref={gridElementRef}
+				<Styles.MasonryGrid ref={gridBaseElementRef}>
+					<Styles.MasonryGridInternalComponent
+						ref={gridInternalComponentBaseElementRef}
 						customProps={{ columnCnt, columnGap, rowGap }}
 						{...otherProps}
 					>
@@ -216,14 +272,22 @@ const MasonryGrid = React.memo(
 							)
 						)}
 						{new Array<typeof Styles.MasonryGridColumnSeparator | null>(
-							columnCnt - 1
+							separatorCnt
 						)
 							.fill(null)
-							.map((separator, idx) => (
-								<Styles.MasonryGridColumnSeparator key={separatorKeys[idx]} />
-							))}
-					</Styles.MasonryGridElement>
-				</Styles.MasonryGridRootElement>
+							.map((separator, idx) => {
+								// console.log(`[${idx}]:`, arrIsSeparatorNeededRef.current[idx]);
+								return (
+									<Styles.MasonryGridColumnSeparator
+										key={separatorKeys[idx]}
+										customProps={{
+											isNeeded: arrIsSeparatorNeededRef.current[idx],
+										}}
+									/>
+								);
+							})}
+					</Styles.MasonryGridInternalComponent>
+				</Styles.MasonryGrid>
 			);
 		}
 	)

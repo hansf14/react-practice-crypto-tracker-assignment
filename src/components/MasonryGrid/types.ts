@@ -1,9 +1,13 @@
 import { ExecutionProps } from "styled-components";
 
+///////////////////////////////////////////////////////////////
+
 export type MasonryGridHandle = {
-	rootElement: HTMLDivElement | null;
-	gridElement: HTMLDivElement | null;
+	gridBaseElement: HTMLDivElement | null;
+	gridInternalComponentBaseElement: HTMLDivElement | null;
 };
+
+///////////////////////////////////////////////////////////////
 
 export const MasonryGridBaseElementTypeValue = "div";
 export type MasonryGridBaseElementType = typeof MasonryGridBaseElementTypeValue;
@@ -24,4 +28,51 @@ export interface MasonryGridProps extends MasonryGridFoundationProps {
 	customProps: MasonryGridCustomProps;
 }
 
-export interface MasonryGridElementProps extends MasonryGridProps {}
+///////////////////////////////////////////////////////////////
+
+export const MasonryGridInternalComponentBaseElementTypeValue = "div";
+export type MasonryGridInternalComponentBaseElementType =
+	typeof MasonryGridInternalComponentBaseElementTypeValue;
+
+export type MasonryGridInternalComponentFoundationProps =
+	React.ComponentPropsWithoutRef<MasonryGridInternalComponentBaseElementType> &
+		ExecutionProps;
+
+export interface MasonryGridInternalComponentCustomProps {
+	columnCnt: number;
+	columnGap: string;
+	rowGap: string;
+}
+
+export interface MasonryGridInternalComponentProps
+	extends MasonryGridInternalComponentFoundationProps {
+	customProps: MasonryGridInternalComponentCustomProps;
+}
+
+///////////////////////////////////////////////////////////////
+
+export const MasonryGridColumnSeparatorBaseElementTypeValue = "div";
+export type MasonryGridColumnSeparatorBaseElementType =
+	typeof MasonryGridColumnSeparatorBaseElementTypeValue;
+export type MasonryGridColumnSeparatorBaseElement =
+	React.ElementRef<MasonryGridColumnSeparatorBaseElementType>;
+export type MasonryGridColumnSeparatorRefElement =
+	MasonryGridColumnSeparatorBaseElement;
+
+export type MasonryGridColumnSeparatorFoundationProps =
+	React.ComponentPropsWithoutRef<MasonryGridColumnSeparatorBaseElementType> &
+		ExecutionProps;
+
+export interface MasonryGridColumnSeparatorCustomProps {
+	isNeeded: boolean;
+}
+export interface MasonryGridColumnSeparatorProps
+	extends MasonryGridColumnSeparatorFoundationProps {
+	customProps: MasonryGridColumnSeparatorCustomProps;
+}
+
+///////////////////////////////////////////////////////////////
+
+export const MasonryGridCustomAttributes = {
+	dataMasonryGridColumnNumber: "data-masonry-grid-column-number",
+} as const;

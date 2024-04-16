@@ -1,49 +1,47 @@
 import styled from "styled-components";
-import { MasonryGridElementProps } from "./types";
+import {
+	MasonryGridInternalComponentProps,
+	MasonryGridCustomAttributes,
+	MasonryGridColumnSeparatorProps,
+} from "./types";
 
-export const MasonryGridRootElement = styled.div``;
+export const MasonryGrid = styled.div``;
 
-export const MasonryGridElement = styled.div.withConfig({
+export const MasonryGridInternalComponent = styled.div.withConfig({
 	shouldForwardProp: (prop) => !["customProps"].includes(prop),
-})<MasonryGridElementProps>`
+})<MasonryGridInternalComponentProps>`
 	display: flex;
 	flex-flow: column wrap;
 
-	column-gap: ${({ customProps }) => customProps.columnGap ?? "0"};
-	row-gap: ${({ customProps }) => customProps.rowGap ?? "0"};
+	column-gap: ${({ customProps }) => customProps.columnGap};
+	row-gap: ${({ customProps }) => customProps.rowGap};
 
 	color: ${({ theme }) => (theme.keyColor08 ? theme.keyColor08 : "#000")};
 
 	${({ customProps }) => `& > * {
 		width: calc(calc(100% - calc(${customProps.columnCnt - 1} * ${
-		customProps.columnGap ?? "0px"
+		customProps.columnGap
 	})) / ${customProps.columnCnt});
-	}`}// & > :first-child {
-	// 	grid-column: 1;
-	// }
-	// & > :nth-child(2) {
-	// 	grid-column: 2;
-	// }
+	}`}
+
+	${({ customProps }) => {
+		let cssForItemsForEachColumn = "";
+		for (let col = 1; col <= customProps.columnCnt; col++) {
+			cssForItemsForEachColumn += `& > [${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${col}"] {
+				order: ${col};
+			}`;
+		}
+		return cssForItemsForEachColumn;
+	}}
 `;
 
-// export type MasonryGridItemFoundationProps = Omit<
-// 	React.ComponentPropsWithoutRef<"div"> & ExecutionProps,
-// 	"key"
-// > & { key: React.Key };
+export const MasonryGridItem = styled.div``;
 
-// export interface MasonryGridItemProps extends MasonryGridItemFoundationProps {}
-
-export const MasonryGridItem = styled.div`
-	font-size: 13px;
-	font-weight: bold;
-
-	span:first-child {
-		margin-right: 3px;
-		font-weight: 400;
-		text-transform: uppercase;
-	}
-`;
-
-export const MasonryGridColumnSeparator = styled.div`
+export const MasonryGridColumnSeparator = styled.div.withConfig({
+	shouldForwardProp: (prop) => !["customProps"].includes(prop),
+})<MasonryGridColumnSeparatorProps>`
 	flex-grow: 1;
+
+	${({ customProps }) =>
+		!customProps.isNeeded ? "display: none;" : ""}
 `;

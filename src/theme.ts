@@ -11,6 +11,7 @@ export const lightTheme: DefaultTheme = {
 	keyColor07: "#e84142",
 	keyColor08: "#000",
 	keyColor09: "#555",
+	nestedListDecoratorColor: "#e84142",
 	borderStyle01: "1px solid rgba(0, 0, 0, 0.4)",
 };
 
@@ -25,5 +26,6 @@ export const darkTheme: DefaultTheme = {
 	keyColor07: "#e84142",
 	keyColor08: "#fafafa",
 	keyColor09: "#fff",
+	nestedListDecoratorColor: "#ffe600",
 	borderStyle01: "1px solid rgba(0, 0, 0, 0.4)",
 };

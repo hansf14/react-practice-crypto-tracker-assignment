@@ -12,6 +12,7 @@ declare module "styled-components" {
 		keyColor07: string;
 		keyColor08: string;
 		keyColor09: string;
+		nestedListDecoratorColor: string;
 		borderStyle01: string;
 	}
 }

@@ -119,13 +119,13 @@ export interface ICoinInfo {
 	market_cap_rank: number;
 	market_data: IMarketData;
 	community_data: {
-		// facebook_likes: null | number;
+		facebook_likes: number | null;
 		// reddit_accounts_active_48h: number;
 		// reddit_average_comments_48h: number;
 		// reddit_average_posts_48h: number;
-		// reddit_subscribers: number;
-		telegram_channel_user_count: number;
-		twitter_followers: number;
+		reddit_subscribers: number | null;
+		telegram_channel_user_count: number | null;
+		twitter_followers: number | null;
 	};
 	developer_data: {
 		closed_issues: number;
@@ -139,7 +139,7 @@ export interface ICoinInfo {
 		pull_request_contributors: number;
 		pull_requests_merged: number;
 		stars: number;
-		subscribers: number;
+		// subscribers: number;
 		total_issues: number;
 	};
 	//// status_updates: object;
@@ -332,7 +332,10 @@ export async function fetchCoinsInfoDev() {
 		headers: { accept: "application/json" },
 	};
 	try {
-		const response = await fetch(`${LOCAL_BASE_URL}/coins-list.json`, options);
+		const response = await fetch(
+			`${LOCAL_BASE_URL}/api/coins-list.json`,
+			options
+		);
 		if (!response.ok && response.status !== 304) {
 			throw new Error(response.status.toString());
 		}
@@ -384,7 +387,10 @@ export async function fetchCoinInfoDev({ coinId }: { coinId: string }) {
 		headers: { accept: "application/json" },
 	};
 	try {
-		const response = await fetch(`${LOCAL_BASE_URL}/${coinId}.json`, options);
+		const response = await fetch(
+			`${LOCAL_BASE_URL}/api/coin/${coinId}.json`,
+			options
+		);
 		if (!response.ok && response.status !== 304) {
 			throw new Error(response.status.toString());
 		}

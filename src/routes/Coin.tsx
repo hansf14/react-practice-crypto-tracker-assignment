@@ -1,4 +1,3 @@
-// import { useEffect, useState } from "react";
 import {
 	useLocation,
 	useParams,
@@ -7,56 +6,161 @@ import {
 	Route,
 	Link,
 } from "react-router-dom";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import Price from "./Price";
 import Chart from "./Chart";
 import { useQuery } from "react-query";
-import { fetchCoinInfo, fetchCoinTickers } from "../api";
+import { fetchCoinInfo, fetchCoinInfoDev } from "@/api";
 import { Helmet } from "react-helmet-async";
+import { default as ContainerBase } from "@/components/Container";
+import { default as HeaderBase } from "@/components/Header";
+import Title from "@/components/Title";
+import Loader from "@/components/Loader";
+import ErrorDescription from "@/components/ErrorDescription";
+import { dateStringToEpochTime, formatDate } from "@/utils/formatDate";
+import useUniqueRandomIds from "@/hooks/useUniqueRandomIds";
+import useBeforeRender from "@/hooks/useBeforeRender";
+import MasonryGrid from "@/components/MasonryGrid";
+import { MasonryGridItem } from "@/components/MasonryGrid/styles";
 
-const Container = styled.div`
-	padding: 0px 20px;
-	max-width: 480px;
-	margin: 0 auto;
+const Header = styled(HeaderBase)`
+	gap: 10px;
 `;
 
-const Header = styled.header`
-	height: 10vh;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-`;
+const Container = styled(ContainerBase)`
+	word-break: break-word;
 
-const Title = styled.h1`
-	font-size: 48px;
-	color: ${(props) => props.theme.keyColor03};
-`;
-
-const Loader = styled.span`
-	text-align: center;
-	display: block;
-`;
-
-const Overview = styled.div`
-	display: flex;
-	justify-content: space-between;
-	background-color: rgba(0, 0, 0, 0.5);
-	padding: 10px 20px;
-	border-radius: 10px;
-`;
-const OverviewItem = styled.div`
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	span:first-child {
-		font-size: 10px;
-		font-weight: 400;
-		text-transform: uppercase;
-		margin-bottom: 5px;
+	& a {
+		transition: color 0.2s ease-in-out;
+		&:hover {
+			color: ${({ theme }) => (theme.keyColor07 ? theme.keyColor07 : "#333")};
+		}
 	}
 `;
+
+const LogoContainer = styled.div`
+	height: 40px;
+	display: flex;
+`;
+
+const Logo = styled.img`
+	height: 100%;
+`;
+
+const LastUpdatedContainer = styled.div`
+	font-size: 13px;
+	margin-bottom: 5px;
+
+	color: ${({ theme }) => (theme.keyColor08 ? theme.keyColor08 : "#000")};
+`;
+
+const LastUpdatedTitle = styled.span``;
+
+const LastUpdatedDetail = styled.span``;
+
+const OverviewContainer = styled.div`
+	display: flex;
+	flex-direction: column;
+
+	background-color: ${({ theme }) =>
+		theme.keyColor04 ? theme.keyColor04 : "#fcfaf5"};
+	padding: 10px 20px;
+	${({ theme }) =>
+		theme.borderStyle01 ? `border: ${theme.borderStyle01};` : ""}
+
+	&:not(:nth-of-type(2)) {
+		border-top: none;
+	}
+`;
+
+const titleCommonCss = css`
+	margin: 7px 0 15px;
+	font-size: 20px;
+	font-weight: bold;
+`;
+
+const OverviewTitle = styled.h2`
+	${titleCommonCss}
+	color: ${({ theme }) => (theme.keyColor03 ? theme.keyColor03 : "#000")};
+`;
+
+const OverviewDetail = styled.ul.withConfig({
+	shouldForwardProp: (prop) => !["customProps"].includes(prop),
+})<{
+	customProps: {
+		columnCnt: number;
+		columnWidths?: string[] | string;
+		columnGap?: string;
+		rowGap?: string;
+	};
+}>`
+	display: grid;
+	grid-template-columns: ${({ customProps }) =>
+		customProps.columnWidths
+			? `${
+					typeof customProps.columnWidths === "string"
+						? customProps.columnWidths
+						: customProps.columnWidths.join(" ")
+			  };`
+			: `repeat(${customProps.columnCnt}, 1fr);`}
+
+	// column-gap: 20px;
+	// row-gap: 10px;
+	${({ customProps }) =>
+		customProps.columnGap ? `column-gap: ${customProps.columnGap};` : ""}
+	${({ customProps }) =>
+		customProps.rowGap ? `row-gap: ${customProps.rowGap};` : ""}
+
+	color: ${({ theme }) => (theme.keyColor08 ? theme.keyColor08 : "#000")};
+
+	& > :nth-child(${({ customProps }) => customProps.columnCnt}n + 1) {
+		text-align: start;
+	}
+	&
+		> :not(
+			:nth-child(${({ customProps }) => customProps.columnCnt}n + 1)
+		):not(:nth-child(${({ customProps }) => customProps.columnCnt}n)) {
+		text-align: center;
+	}
+	& > :nth-child(${({ customProps }) => customProps.columnCnt}n) {
+		text-align: end;
+	}
+`;
+
+const OverviewDetailItem = styled.li`
+	font-size: 13px;
+	font-weight: bold;
+
+	span:first-child {
+		margin-right: 3px;
+		font-weight: 400;
+		text-transform: uppercase;
+	}
+`;
+
+const NestedList = styled.ul`
+	margin-top: 5px;
+	margin-left: 10px;
+
+	${OverviewDetailItem}:has(&) {
+		display: flex;
+		flex-direction: column;
+	}
+`;
+
+const NestedListItem = styled.li``;
+
+const DescriptionContainer = styled(OverviewContainer)`
+	background-color: ${({ theme }) =>
+		theme.keyColor05 ? theme.keyColor05 : "#fcfaf5"};
+`;
+
+const DescriptionTitle = styled.h2`
+	${titleCommonCss}
+`;
+
 const Description = styled.p`
-	margin: 20px 0px;
+	margin: 0 10px 10px;
 `;
 
 const Tabs = styled.div`
@@ -66,16 +170,22 @@ const Tabs = styled.div`
 	gap: 10px;
 `;
 
-const Tab = styled.span<{ isActive: boolean }>`
+const Tab = styled.span.withConfig({
+	shouldForwardProp: (prop) => !["customProps"].includes(prop),
+})<{ customProps?: { isActive?: boolean } }>`
 	text-align: center;
 	text-transform: uppercase;
-	font-size: 12px;
+	font-size: 13px;
 	font-weight: 400;
 	background-color: rgba(0, 0, 0, 0.5);
 	padding: 7px 0px;
-	border-radius: 10px;
-	color: ${(props) =>
-		props.isActive ? props.theme.keyColor03 : props.theme.keyColor01};
+	color: ${({ customProps, theme }) =>
+		typeof customProps?.isActive === "boolean"
+			? customProps?.isActive
+				? theme.keyColor03
+				: theme.keyColor01
+			: "#000"};
+
 	a {
 		display: block;
 	}
@@ -89,190 +199,325 @@ interface RouteState {
 	name: string;
 }
 
-interface InfoData {
-	id: string;
-	name: string;
-	symbol: string;
-	rank: number;
-	is_new: boolean;
-	is_active: boolean;
-	type: string;
-	logo: string;
-	// tags: object;
-	// team: object;
-	description: string;
-	message: string;
-	open_source: boolean;
-	started_at: string;
-	development_status: string;
-	hardware_wallet: boolean;
-	proof_type: string;
-	org_structure: string;
-	hash_algorithm: string;
-	links: object;
-	// links_extended: object;
-	// whitepaper: object;
-	first_data_at: string;
-	last_data_at: string;
-}
-
-interface PriceData {
-	id: string;
-	name: string;
-	symbol: string;
-	rank: number;
-	total_supply: number;
-	max_supply: number;
-	beta_value: number;
-	first_data_at: string;
-	last_updated: string;
-	quotes: {
-		USD: {
-			ath_date: string;
-			ath_price: number;
-			market_cap: number;
-			market_cap_change_24h: number;
-			percent_change_1h: number;
-			percent_change_1y: number;
-			percent_change_6h: number;
-			percent_change_7d: number;
-			percent_change_12h: number;
-			percent_change_15m: number;
-			percent_change_24h: number;
-			percent_change_30d: number;
-			percent_change_30m: number;
-			percent_from_price_ath: number;
-			price: number;
-			volume_24h: number;
-			volume_24h_change_24h: number;
-		};
-	};
-}
-
-interface PriceData {}
-
 function Coin() {
 	const { coinId } = useParams<RouteParams>();
-	// const [loading, setLoading] = useState(true);
-	// const {
-	// 	state: { name },
-	// } = useLocation<RouteState>();
-	// // console.log(location);
-	// console.log(name);
-
 	const { state } = useLocation<RouteState>();
-	// // console.log(state.name);
+	// console.log(state.name);
 
-	// const [info, setInfo] = useState<InfoData>();
-	// const [priceInfo, setPriceInfo] = useState<PriceData>();
-
-	const { isLoading: infoLoading, data: infoData } = useQuery<InfoData>(
+	const { isLoading, data, isError, error } = useQuery<
+		Awaited<ReturnType<typeof fetchCoinInfo>>
+	>(
 		["info", coinId],
-		() => fetchCoinInfo(coinId)
-	);
-	const { isLoading: tickersLoading, data: tickersData } = useQuery<PriceData>(
-		["tickers", coinId],
-		() => fetchCoinTickers(coinId),
+		() =>
+			// fetchCoinInfo(coinId)
+			fetchCoinInfoDev({ coinId }),
 		{
-			refetchInterval: 3600 * 1000,
+			staleTime: 3600 * 1000,
+			cacheTime: 3600 * 1000,
 		}
 	);
+	console.log(data);
 
 	const priceMatch = useRouteMatch("/:coinId/price");
 	// console.log(priceMatch);
 	const chartMatch = useRouteMatch("/:coinId/chart");
 	// console.log(chartMatch);
 
-	// useEffect(() => {
-	// 	(async () => {
-	// 		const infoData = await (
-	// 			await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
-	// 		).json();
-	// 		console.log(infoData);
+	let date: string | null = null;
+	let time: string | null = null;
+	if (data) {
+		const epochTime = dateStringToEpochTime(data.last_updated);
+		const { formattedDate, formattedTime } = formatDate(epochTime);
+		date = formattedDate;
+		time = formattedTime;
+	}
 
-	// 		const priceData = await (
-	// 			await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
-	// 		).json();
-	// 		console.log(priceData);
+	const bitcoinForumLink = data?.links.bitcointalk_thread_identifier
+		? `https://bitcointalk.org/index.php?topic=${data.links.bitcointalk_thread_identifier}`
+		: null;
 
-	// 		setInfo(infoData);
-	// 		setPriceInfo(priceData);
-	// 		setLoading(false);
-	// 	})();
-	// }, []);
+	const githubRepoLinks = data?.links.repos_url.github ?? null;
+	const {
+		ids: githubRepoLinkKeys,
+		keepOrExpandIds: keepOrExpandGithubRepoLinkKeys,
+	} = useUniqueRandomIds(githubRepoLinks?.length ?? 0);
 
-	const loading = infoLoading || tickersLoading;
+	useBeforeRender(() => {
+		keepOrExpandGithubRepoLinkKeys(githubRepoLinks?.length ?? 0);
+	}, [githubRepoLinks?.length]);
+
+	const bitbucketRepoLinks = data?.links.repos_url.bitbucket ?? null;
+	const {
+		ids: bitbucketRepoLinkKeys,
+		keepOrExpandIds: keepOrExpandBitbucketRepoLinkKeys,
+	} = useUniqueRandomIds(bitbucketRepoLinks?.length ?? 0);
+
+	useBeforeRender(() => {
+		keepOrExpandBitbucketRepoLinkKeys(bitbucketRepoLinks?.length ?? 0);
+	}, [bitbucketRepoLinks?.length]);
+
+	const blockchainSites = data?.links.blockchain_site ?? null;
+	const {
+		ids: blockchainSiteKeys,
+		keepOrExpandIds: keepOrExpandBlockchainSiteKeys,
+	} = useUniqueRandomIds(blockchainSites?.length ?? 0);
+
+	useBeforeRender(() => {
+		keepOrExpandBlockchainSiteKeys(blockchainSites?.length ?? 0);
+	}, [blockchainSites?.length]);
+
+	const overviewDetailColumnGap = "20px";
+	const overviewDetailRowGap = "10px";
 
 	return (
 		<Container>
 			<Helmet>
 				<title>
-					{state?.name ? state.name : loading ? "Loading..." : infoData?.name}
+					{state?.name ? state.name : isLoading ? "Loading..." : data?.name}
 				</title>
 				<link
 					rel="icon"
 					type="image/png"
-					href={`https://static.coinpaprika.com/coin/${coinId}/logo.png`}
+					href={
+						data
+							? `https://cryptofonts.com/img/icons/${
+									data.symbol === "lunc" ? "luna" : data.symbol
+							  }.svg`
+							: `${process.env.PUBLIC_URL}/favicon.png`
+					}
 					sizes="16x16"
 				/>
 			</Helmet>
 			<Header>
 				<Title>
-					{state?.name ? state.name : loading ? "Loading..." : infoData?.name}
+					{state?.name ? state.name : isLoading ? "Loading..." : data?.name}
 				</Title>
+				<LogoContainer>
+					<Logo
+						src={
+							data &&
+							`https://cryptofonts.com/img/icons/${
+								data.symbol === "lunc" ? "luna" : data.symbol
+							}.svg`
+						}
+					/>
+				</LogoContainer>
 			</Header>
-			{loading ? (
+			{isLoading ? (
 				<Loader>Loading...</Loader>
+			) : isError ? (
+				<ErrorDescription customProps={{ error }} />
 			) : (
 				<>
-					<Overview>
-						<OverviewItem>
-							<span>Rank:</span>
-							<span>{infoData?.rank}</span>
-						</OverviewItem>
-						<OverviewItem>
-							<span>Symbol:</span>
-							<span>{infoData?.symbol}</span>
-						</OverviewItem>
-						<OverviewItem>
-							{/* <span>Open Source:</span> */}
-							<span>Price:</span>
-							{/* <span>{infoData?.open_source ? "Yes" : "No"}</span> */}
-							<span>${tickersData?.quotes.USD.price.toFixed(3)}</span>
-						</OverviewItem>
-					</Overview>
-					<Description>{infoData?.description}</Description>
-					<Overview>
-						<OverviewItem>
-							<span>Total Supply:</span>
-							<span>{tickersData?.total_supply}</span>
-						</OverviewItem>
-						<OverviewItem>
-							<span>Max Supply:</span>
-							<span>{tickersData?.max_supply}</span>
-						</OverviewItem>
-					</Overview>
+					<LastUpdatedContainer>
+						<LastUpdatedTitle>Last Update: </LastUpdatedTitle>
+						<LastUpdatedDetail>
+							{date && time ? `${date} ${time}` : "Unknown"}
+						</LastUpdatedDetail>
+					</LastUpdatedContainer>
+					<OverviewContainer>
+						<OverviewTitle>Overview</OverviewTitle>
+						<OverviewDetail
+							customProps={{
+								columnCnt: 3,
+								columnGap: overviewDetailColumnGap,
+								rowGap: overviewDetailRowGap,
+							}}
+						>
+							<OverviewDetailItem>
+								<span>Rank: </span>
+								<span>{data?.market_cap_rank ?? "Unknown"}</span>
+							</OverviewDetailItem>
+							<OverviewDetailItem>
+								<span>Symbol: </span>
+								<span>{data?.symbol ?? "Unknown"}</span>
+							</OverviewDetailItem>
+							<OverviewDetailItem>
+								<span>Price: </span>
+								<span>
+									${data?.market_data.current_price.usd.toFixed(3) ?? "Unknown"}
+								</span>
+							</OverviewDetailItem>
+						</OverviewDetail>
+					</OverviewContainer>
+
+					<OverviewContainer>
+						<OverviewTitle>Community</OverviewTitle>
+						<OverviewDetail
+							customProps={{
+								columnCnt: 2,
+								columnGap: overviewDetailColumnGap,
+								rowGap: overviewDetailRowGap,
+							}}
+						>
+							<OverviewDetailItem>
+								<span>Twitter Followers: </span>
+								<span>
+									{data?.community_data.twitter_followers ?? "Unknown"}
+								</span>
+							</OverviewDetailItem>
+							<OverviewDetailItem>
+								<span>Telegram Channel User Count: </span>
+								<span>
+									{data?.community_data.telegram_channel_user_count ??
+										"Unknown"}
+								</span>
+							</OverviewDetailItem>
+						</OverviewDetail>
+					</OverviewContainer>
+
+					<OverviewContainer>
+						<OverviewTitle>Code</OverviewTitle>
+						<OverviewDetail
+							customProps={{
+								columnCnt: 2,
+								columnGap: overviewDetailColumnGap,
+								rowGap: overviewDetailRowGap,
+							}}
+						>
+							<OverviewDetailItem>
+								<span>Github Repositories: </span>
+								{githubRepoLinks && githubRepoLinks.length !== 0 ? (
+									<NestedList>
+										{githubRepoLinks.map((link, idx) => (
+											<NestedListItem key={githubRepoLinkKeys[idx]}>
+												<a href={link}>{link}</a>
+											</NestedListItem>
+										))}
+									</NestedList>
+								) : (
+									<span>Unknown</span>
+								)}
+							</OverviewDetailItem>
+							<OverviewDetailItem>
+								<span>Github Stars: </span>
+								<span>{data?.developer_data.stars ?? "Unknown"}</span>
+							</OverviewDetailItem>
+							<OverviewDetailItem>
+								<span>Github Subscribers: </span>
+								<span>{data?.developer_data.subscribers ?? "Unknown"}</span>
+							</OverviewDetailItem>
+							<OverviewDetailItem>
+								<span>Github Forks: </span>
+								<span>{data?.developer_data.forks ?? "Unknown"}</span>
+							</OverviewDetailItem>
+							<OverviewDetailItem>
+								<span>Github Issues: </span>
+								<span>{data?.developer_data.total_issues ?? "Unknown"}</span>
+							</OverviewDetailItem>
+							<OverviewDetailItem>
+								<span>Bitbucket Repositories: </span>
+								{bitbucketRepoLinks && bitbucketRepoLinks.length !== 0 ? (
+									<NestedList>
+										{bitbucketRepoLinks.map((link, idx) => (
+											<NestedListItem key={bitbucketRepoLinkKeys[idx]}>
+												<a href={link}>{link}</a>
+											</NestedListItem>
+										))}
+									</NestedList>
+								) : (
+									<span>Unknown</span>
+								)}
+							</OverviewDetailItem>
+						</OverviewDetail>
+					</OverviewContainer>
+
+					{data?.description.en && (
+						<DescriptionContainer>
+							<DescriptionTitle>Description</DescriptionTitle>
+							<Description>{data.description.en}</Description>
+						</DescriptionContainer>
+					)}
+
+					<OverviewContainer>
+						<OverviewTitle>Links</OverviewTitle>
+						<MasonryGrid customProps={{ columnCnt: 2, rowGap: "20px" }}>
+							<MasonryGridItem>
+								{bitcoinForumLink ? (
+									<>
+										<span>Bitcoin Forum </span>
+										<NestedList>
+											<a href={bitcoinForumLink}>{bitcoinForumLink}</a>
+										</NestedList>
+									</>
+								) : (
+									<>
+										<span>Bitcoin Forum: </span>
+										<span>Unknown</span>
+									</>
+								)}
+							</MasonryGridItem>
+							{/* Blockchain Sites */}
+							<MasonryGridItem>
+								{blockchainSites && blockchainSites.length !== 0 ? (
+									<>
+										<span>Blockchain Sites </span>
+										<NestedList>
+											{blockchainSites.map((link, idx) => (
+												<NestedListItem key={blockchainSiteKeys[idx]}>
+													<a href={link}>{link}</a>
+												</NestedListItem>
+											))}
+										</NestedList>
+									</>
+								) : (
+									<>
+										<span>Blockchain Sites: </span>
+										<span>Unknown</span>
+									</>
+								)}
+							</MasonryGridItem>
+							{/* Facebook */}
+							{/* Chat */}
+							{/* Homepage */}
+							{/*  */}
+							<MasonryGridItem>
+								<span>Github Subscribers: </span>
+								<span>{data?.developer_data.subscribers ?? "Unknown"}</span>
+							</MasonryGridItem>
+						</MasonryGrid>
+					</OverviewContainer>
+
+					<OverviewContainer>
+						<OverviewDetail
+							customProps={{
+								columnCnt: 2,
+								columnGap: overviewDetailColumnGap,
+								rowGap: overviewDetailRowGap,
+							}}
+						>
+							<OverviewDetailItem>
+								<span>Total Supply:</span>
+								{/* <span>{tickersData?.total_supply}</span> */}
+							</OverviewDetailItem>
+							<OverviewDetailItem>
+								<span>Max Supply:</span>
+								{/* <span>{tickersData?.max_supply}</span> */}
+							</OverviewDetailItem>
+						</OverviewDetail>
+					</OverviewContainer>
 
 					<Tabs>
-						<Tab isActive={chartMatch !== null}>
+						<Tab customProps={{ isActive: chartMatch !== null }}>
 							<Link to={`/${coinId}/chart`}>Chart</Link>
 						</Tab>
-						<Tab isActive={priceMatch !== null}>
+						<Tab customProps={{ isActive: priceMatch !== null }}>
 							<Link to={`/${coinId}/price`}>Price</Link>
 						</Tab>
 					</Tabs>
 
-					<Switch>
+					{/* <Switch>
 						<Route path={`/:coinId/price`}>
 							<Price />
 						</Route>
 						<Route path={`/:coinId/chart`}>
 							<Chart coinId={coinId} />
 						</Route>
-					</Switch>
+					</Switch> */}
 				</>
 			)}
 		</Container>
 	);
 }
+
 export default Coin;

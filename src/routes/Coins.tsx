@@ -1,21 +1,13 @@
-// import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { POPULAR_COIN_IDS, fetchCoinsInfo, fetchCoinsInfoDev } from "../api";
 import { Helmet } from "react-helmet-async";
-
-const Container = styled.div`
-	padding-top: 55px;
-	max-width: 600px;
-	margin: 0 auto;
-`;
-
-const Header = styled.header`
-	display: flex;
-	justify-content: center;
-	align-items: center;
-`;
+import { POPULAR_COIN_IDS, fetchCoinsInfo } from "@/api";
+import Header from "@/components/Header";
+import Container from "@/components/Container";
+import Title from "@/components/Title";
+import Loader from "@/components/Loader";
+import ErrorDescription from "@/components/ErrorDescription";
 
 const CoinsList = styled.ul`
 	display: grid;
@@ -33,10 +25,12 @@ const CoinsList = styled.ul`
 `;
 
 const Coin = styled.li`
-	background-color: ${({ theme }) => theme.keyColor05};
-	border: 1px solid rgba(0, 0, 0, 0.4);
+	background-color: ${({ theme }) =>
+		theme.keyColor05 ? theme.keyColor05 : "#fcfaf5"};
+	${({ theme }) =>
+		theme.borderStyle01 ? `border: ${theme.borderStyle01};` : ""}
 	border-radius: 6px;
-	color: ${({ theme }) => (theme ? theme.keyColor02 : "#000")};
+	color: ${({ theme }) => (theme.keyColor02 ? theme.keyColor02 : "#000")};
 	transition: color 0.1s ease-in-out, background-color 0.3s ease-in-out;
 
 	a {
@@ -48,22 +42,9 @@ const Coin = styled.li`
 
 	&:hover {
 		a {
-			color: ${({ theme }) => (theme ? theme.keyColor07 : "#333")};
+			color: ${({ theme }) => (theme.keyColor07 ? theme.keyColor07 : "#333")};
 		}
 	}
-`;
-
-const Title = styled.h1`
-	margin: 100px 0 60px;
-	color: ${({ theme }) => (theme ? theme.keyColor03 : "#ffe600")};
-	transition: color 0.3s ease-in-out;
-	font-size: 40px;
-	font-weight: bold;
-`;
-
-const Loader = styled.span`
-	text-align: center;
-	display: block;
 `;
 
 const Img = styled.img`
@@ -72,29 +53,29 @@ const Img = styled.img`
 	margin-right: 10px;
 `;
 
-interface CoinMinimalInfo {
-	id: string;
-	name: string;
-	symbol: string;
-}
-
 function Coins() {
-	const { isLoading, data } = useQuery<CoinMinimalInfo[]>(
+	const { isLoading, data, isError, error } = useQuery<
+		Awaited<ReturnType<typeof fetchCoinsInfo>>
+	>(
 		["coins-list"],
-		// fetchCoinsInfo,
-		fetchCoinsInfoDev,
+		fetchCoinsInfo,
+		// fetchCoinsInfoDev,
 		{
 			// select: (data) => data.slice(0, 30),
-			select: (data) =>
-				data.filter((coin) =>
+			select: (data) => {
+				return data?.filter((coin) =>
 					// POPULAR_COIN_SYMBOLS.includes(coin.symbol.toUpperCase())
-					POPULAR_COIN_IDS.includes(coin.id)
-				),
+					([...POPULAR_COIN_IDS] as string[]).includes(coin.id)
+				);
+			},
 			staleTime: 3600 * 1000,
 			cacheTime: 3600 * 1000,
 		}
 	);
-	console.log(data);
+	// console.log("isLoading:", isLoading);
+	// console.log("data:", data);
+	// console.log("isError:", isError);
+	// console.log("error:", error);
 
 	return (
 		<Container>
@@ -112,6 +93,8 @@ function Coins() {
 			</Header>
 			{isLoading ? (
 				<Loader>Loading...</Loader>
+			) : isError ? (
+				<ErrorDescription customProps={{ error }} />
 			) : (
 				<CoinsList>
 					{data?.map((coin) => (
@@ -138,4 +121,5 @@ function Coins() {
 		</Container>
 	);
 }
+
 export default Coins;

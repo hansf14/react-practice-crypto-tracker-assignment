@@ -2,6 +2,7 @@ import "styled-components";
 
 declare module "styled-components" {
 	export interface DefaultTheme {
+		navBarHeight: string;
 		keyColor01: string;
 		keyColor02: string;
 		keyColor03: string;
@@ -9,5 +10,8 @@ declare module "styled-components" {
 		keyColor05: string;
 		keyColor06: string;
 		keyColor07: string;
+		keyColor08: string;
+		keyColor09: string;
+		borderStyle01: string;
 	}
 }

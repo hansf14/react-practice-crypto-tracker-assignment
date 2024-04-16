@@ -15,10 +15,13 @@ export const NavBar = styled(NavBarBaseElementTypeValue)`
 	position: fixed;
 	width: 100%;
 
-	height: 55px;
+	${({ theme }) =>
+		theme.navBarHeight ? `height: ${theme.navBarHeight}px;` : ""};
 	background-color: ${({ theme }) =>
-		theme ? theme.keyColor04 : "transparent"};
-	transition: background-color 0.3s ease-in-out;
+		theme.keyColor04 ? theme.keyColor04 : "transparent"};
+	border-bottom: 2px solid
+		${({ theme }) => (theme.keyColor09 ? theme.keyColor09 : "transparent")};
+	transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 
 	${CssVars.themeTogglerWidth}: 40px;
 	${CssVars.themeTogglerHeight}: 22px;
@@ -45,17 +48,16 @@ export const NavBarContent = styled.div`
 
 export const Title = styled.div`
 	font-size: 25px;
-	
 `;
 
 const NavMenuButtonCss = css`
-	color: ${({ theme }) => (theme ? theme.keyColor03 : "#333")};
+	color: ${({ theme }) => (theme.keyColor03 ? theme.keyColor03 : "#333")};
 	font-size: 20px;
 	font-weight: bold;
 
 	transition: color 0.4s ease-in-out, filter 0.4s ease-in-out;
 	&:hover {
-		color: ${({ theme }) => (theme ? theme.keyColor06 : "#553322")};
+		color: ${({ theme }) => (theme.keyColor06 ? theme.keyColor06 : "#553322")};
 		// filter: contrast(200%);
 	}
 `;

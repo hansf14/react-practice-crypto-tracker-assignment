@@ -1,7 +1,7 @@
 // import { useParams } from "react-router-dom";
 
 import { useQuery } from "react-query";
-import { fetchCoinHistory } from "../api";
+import { fetchCoinInfo } from "@/api";
 import ApexChart from "react-apexcharts";
 
 interface IHistoricalData {
@@ -21,17 +21,17 @@ interface ChartProps {
 
 function Chart({ coinId }: ChartProps) {
 	// const params = useParams();
-	const { isLoading, data } = useQuery<IHistoricalData[] | { error: string }>(
-		["ohlcv", coinId],
-		() => fetchCoinHistory(coinId),
-		// {
-		// 	refetchInterval: 10000,
-		// }
-	);
+	// const { isLoading, data } = useQuery<IHistoricalData[] | { error: string }>(
+	// 	["ohlcv", coinId],
+	// 	() => fetchCoinInfo(coinId),
+	// 	// {
+	// 	// 	refetchInterval: 10000,
+	// 	// }
+	// );
 
 	return (
 		<div>
-			{isLoading ? (
+			{/* {isLoading ? (
 				"Loading chart..."
 			) : (data as { error: string }).error ? (
 				(data as { error: string }).error
@@ -119,6 +119,7 @@ function Chart({ coinId }: ChartProps) {
 					]}
 				/>
 			)
+
 			// <ApexChart
 			// 	type="line"
 			// 	options={{
@@ -136,7 +137,7 @@ function Chart({ coinId }: ChartProps) {
 			// 		},
 			// 	]}
 			// />
-			}
+			} */}
 		</div>
 	);
 }

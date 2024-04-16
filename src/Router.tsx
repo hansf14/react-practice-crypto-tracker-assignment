@@ -1,18 +1,22 @@
 import { BrowserRouter, Switch, Route } from "react-router-dom";
-import Coin from "./routes/Coin";
-import Coins from "./routes/Coins";
-import NavBar from "./components/NavBar";
+import Coin from "@/routes/Coin";
+import Coins from "@/routes/Coins";
+import NotFound from "@/routes/NotFound";
+import NavBar from "@/components/NavBar";
 
 function Router() {
 	return (
 		<BrowserRouter basename={process.env.PUBLIC_URL}>
 			<NavBar />
 			<Switch>
-				<Route path="/:coinId">
+				<Route exact path="/:coinId">
 					<Coin />
 				</Route>
-				<Route path="/">
+				<Route exact path="/">
 					<Coins />
+				</Route>
+				<Route path="*">
+					<NotFound />
 				</Route>
 			</Switch>
 		</BrowserRouter>

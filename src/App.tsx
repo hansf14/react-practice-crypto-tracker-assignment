@@ -68,8 +68,9 @@ const GlobalStyle = createGlobalStyle`
     font-weight: 500;
     font-style: normal;
     
-    background-color: ${({ theme }) => theme.keyColor01};
-    color: ${({ theme }) => theme.keyColor02};
+    background-color: ${({ theme }) =>
+			theme.keyColor01 ? theme.keyColor01 : "#fafafa"};
+    color: ${({ theme }) => (theme.keyColor02 ? theme.keyColor02 : "#000")};
     transition: color 0.1s ease-in-out, background-color 0.3s ease-in-out;
   }
   a {

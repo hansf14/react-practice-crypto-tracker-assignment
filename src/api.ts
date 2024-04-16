@@ -1,4 +1,5 @@
-export const BASE_URL = "https://api.coingecko.com/api/v3/coins";
+export const BASE_URL = "https://api.coingecko.com/api/v3/coins" as const;
+
 export const POPULAR_COIN_SYMBOLS = [
 	"BTC", // Bitcoin
 	"ETH", // Ethereum
@@ -30,7 +31,8 @@ export const POPULAR_COIN_SYMBOLS = [
 	"THETA", // Theta
 	"MKR", // Maker
 	"XLM", // Stellar
-];
+] as const;
+
 export const POPULAR_COIN_IDS = [
 	"bitcoin", // Bitcoin
 	"ethereum", // Ethereum
@@ -61,67 +63,342 @@ export const POPULAR_COIN_IDS = [
 	"neo", // Neo
 	"theta-token", // Theta
 	"maker", // Maker
-];
+] as const;
+export interface ICoinMinimalInfo {
+	id: string;
+	name: string;
+	symbol: string;
+}
 
-// export async function fetchCoins() {
-// 	const response = await fetch("https://api.coinpaprika.com/v1/coins");
-// 	const json = await response.json();
-// 	return json;
-// }
+export interface ICoinInfo {
+	id: string;
+	symbol: string;
+	name: string;
+	web_slug: string;
+	asset_platform_id: string;
+	//// platforms: object;
+	//// detail_platforms: object;
+	// block_time_in_minutes: number;
+	//// hashing_algorithm: object;
+	categories: string[];
+	preview_listing: boolean;
+	//// public_notice: object;
+	//// additional_notices: object;
+	description: {
+		en: string;
+	};
+	links: {
+		announcement_url: string[];
+		bitcointalk_thread_identifier: number;
+		blockchain_site: string[];
+		chat_url: string[];
+		facebook_username: string;
+		homepage: string[];
+		official_forum_url: string[];
+		repos_url: {
+			github: string[];
+			bitbucket: string[];
+		};
+		subreddit_url: string;
+		telegram_channel_identifier: string;
+		twitter_screen_name: string;
+		whitepaper: string;
+	};
+	image: {
+		large: string;
+		small: string;
+		thumb: string;
+	};
+	//// country_origin: string;
+	//// genesis_date: object;
+	contract_address: string;
+	sentiment_votes_up_percentage: number;
+	sentiment_votes_down_percentage: number;
+	watchlist_portfolio_users: number;
+	market_cap_rank: number;
+	market_data: IMarketData;
+	community_data: {
+		// facebook_likes: null | number;
+		// reddit_accounts_active_48h: number;
+		// reddit_average_comments_48h: number;
+		// reddit_average_posts_48h: number;
+		// reddit_subscribers: number;
+		telegram_channel_user_count: number;
+		twitter_followers: number;
+	};
+	developer_data: {
+		closed_issues: number;
+		code_additions_deletions_4_weeks: {
+			additions: number;
+			deletions: number;
+		};
+		commit_count_4_weeks: number;
+		forks: number;
+		last_4_weeks_commit_activity_series: number[];
+		pull_request_contributors: number;
+		pull_requests_merged: number;
+		stars: number;
+		subscribers: number;
+		total_issues: number;
+	};
+	//// status_updates: object;
+	last_updated: string;
+	tickers: {
+		base: string;
+		bid_ask_spread_percentage: number;
+		coin_id: string;
+		converted_last: {
+			btc: number;
+			eth: number;
+			usd: number;
+		};
+		converted_volume: {
+			btc: number;
+			eth: number;
+			usd: number;
+		};
+		is_anomaly: boolean;
+		is_stale: boolean;
+		last: number;
+		last_fetch_at: string;
+		last_traded_at: string;
+		market: {
+			name: string;
+			identifier: string;
+			has_trading_incentive: boolean;
+		};
+		target: string;
+		target_coin_id: string;
+		timestamp: string;
+		token_info_url: string | null;
+		trade_url: string;
+		trust_score: string;
+		volume: number;
+	}[];
+}
 
-// export function fetchCoinsInfo() {
-// 	return fetch(
-// 		`${BASE_URL}/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1`,
-// 		{
-// 			mode: "no-cors",
-// 		}
-// 	).then((response) => response.json());
-// }
+export interface IMarketData {
+	current_price: ICurrency;
+	total_value_locked: ICurrencyMinimal;
+	mcap_to_tvl_ratio: number;
+	fdv_to_tvl_ratio: number;
+	// roi: object
+	ath: ICurrency;
+	ath_change_percentage: ICurrencyChangePercentage;
+	ath_date: ICurrencyDate;
+	atl: ICurrency;
+	atl_change_percentage: ICurrencyChangePercentage;
+	atl_date: ICurrencyDate;
+	market_cap: ICurrency;
+	market_cap_rank: number;
+	fully_diluted_valuation: ICurrency;
+	market_cap_fdv_ratio: number;
+	total_volume: ICurrency;
+	high_24h: ICurrency;
+	low_24h: ICurrency;
+	price_change_24h: number;
+	price_change_percentage_24h: number;
+	price_change_percentage_7d: number;
+	price_change_percentage_14d: number;
+	price_change_percentage_30d: number;
+	price_change_percentage_60d: number;
+	price_change_percentage_200d: number;
+	price_change_percentage_1y: number;
+	market_cap_change_24h: number;
+	market_cap_change_percentage_24h: number;
+	price_change_24h_in_currency: ICurrency;
+	price_change_percentage_1h_in_currency: ICurrencyChangePercentage;
+	price_change_percentage_24h_in_currency: ICurrencyChangePercentage;
+	price_change_percentage_7d_in_currency: ICurrencyChangePercentage;
+	price_change_percentage_14d_in_currency: ICurrencyChangePercentage;
+	price_change_percentage_30d_in_currency: ICurrencyChangePercentage;
+	price_change_percentage_60d_in_currency: ICurrencyChangePercentage;
+	price_change_percentage_200d_in_currency: ICurrencyChangePercentage;
+	price_change_percentage_1y_in_currency: ICurrencyChangePercentage;
+	market_cap_change_24h_in_currency: ICurrency;
+	market_cap_change_percentage_24h_in_currency: ICurrencyChangePercentage;
+	total_supply: number;
+	max_supply: number;
+	circulating_supply: number;
+	last_updated: string;
+}
 
-export function fetchCoinsInfo() {
+export interface ICurrencyMinimal {
+	btc: number;
+	usd: number;
+}
+
+export interface ICurrency {
+	aed: number;
+	ars: number;
+	aud: number;
+	bch: number;
+	bdt: number;
+	bhd: number;
+	bmd: number;
+	bnb: number;
+	brl: number;
+	btc: number;
+	cad: number;
+	chf: number;
+	clp: number;
+	cny: number;
+	czk: number;
+	dkk: number;
+	dot: number;
+	eos: number;
+	eth: number;
+	eur: number;
+	gbp: number;
+	gel: number;
+	hkd: number;
+	huf: number;
+	idr: number;
+	ils: number;
+	inr: number;
+	jpy: number;
+	krw: number;
+	kwd: number;
+	lkr: number;
+	ltc: number;
+	mmk: number;
+	mxn: number;
+	myr: number;
+	ngn: number;
+	nok: number;
+	nzd: number;
+	php: number;
+	pkr: number;
+	pln: number;
+	rub: number;
+	sar: number;
+	sek: number;
+	sgd: number;
+	thb: number;
+	try: number;
+	twd: number;
+	uah: number;
+	usd: number;
+	vef: number;
+	vnd: number;
+	xag: number;
+	xau: number;
+	xdr: number;
+	xlm: number;
+	xrp: number;
+	yfi: number;
+	zar: number;
+	bits: number;
+	link: number;
+	sats: number;
+}
+
+export interface ICurrencyChangePercentage extends ICurrency {}
+
+export type ICurrencyDate = {
+	[K in keyof ICurrency]: string;
+};
+
+export async function fetchCoinsInfo() {
 	const options = {
 		method: "GET",
 		headers: { accept: "application/json" },
 	};
-	return fetch(`${BASE_URL}/list`, options)
-		.then((response) => response.json())
-		.catch((err) => {
-			console.error(err);
-			return fetchCoinsInfoDev(); // fallback
-		});
+	try {
+		const response = await fetch(`${BASE_URL}/list`, options);
+		if (!response.ok && response.status !== 304) {
+			throw new Error(response.status.toString());
+		}
+		const json: ICoinMinimalInfo[] = await response.json();
+		return json;
+	} catch (error) {
+		console.group("[fetchCoinsInfo]");
+		if (error instanceof Error) {
+			console.log(`Error ${error.message}`);
+		} else {
+			console.log(`Error: ${error as string}`);
+		}
+		console.log("Using a fallback method due to a fetch error...");
+		console.groupEnd();
+
+		return await fetchCoinsInfoDev(); // fallback
+	}
 }
 
-export function fetchCoinsInfoDev() {
+export async function fetchCoinsInfoDev() {
 	const options = {
 		method: "GET",
 		headers: { accept: "application/json" },
 	};
-	return fetch("./coins-list.json", options)
-		.then((response) => response.json())
-		.catch((err) => console.error(err));
+	try {
+		const response = await fetch("/coins-list.json", options);
+		if (!response.ok && response.status !== 304) {
+			throw new Error(response.status.toString());
+		}
+		const json: ICoinMinimalInfo[] = await response.json();
+		return json;
+	} catch (error) {
+		console.group("[fetchCoinsInfoDev]");
+		if (error instanceof Error) {
+			console.log(`Error ${error.message}`);
+			console.groupEnd();
+			throw error;
+		} else {
+			console.log(`Error: ${error as string}`);
+			console.groupEnd();
+			throw new Error(error as string);
+		}
+	}
 }
 
-export function fetchCoinInfo(coinId: string) {
-	return fetch(`${BASE_URL}/${coinId}?localization=false`).then((response) =>
-		response.json()
-	);
+export async function fetchCoinInfo({ coinId }: { coinId: string }) {
+	const options = {
+		method: "GET",
+		headers: { accept: "application/json" },
+	};
+	try {
+		const response = await fetch(`${BASE_URL}/${coinId}`, options);
+		if (!response.ok && response.status !== 304) {
+			throw new Error(response.status.toString());
+		}
+		const json: ICoinInfo = await response.json();
+		return json;
+	} catch (error) {
+		console.group("[fetchCoinsInfo]");
+		if (error instanceof Error) {
+			console.log(`Error ${error.message}`);
+		} else {
+			console.log(`Error: ${error as string}`);
+		}
+		console.log("Using a fallback method due to a fetch error...");
+		console.groupEnd();
+
+		return await fetchCoinInfoDev({ coinId }); // fallback
+	}
 }
 
-export function fetchCoinTickers(coinId: string) {
-	return fetch(`${BASE_URL}/tickers/${coinId}`).then((response) =>
-		response.json()
-	);
-}
-
-export function fetchCoinHistory(coinId: string) {
-	// Coinpaprika API 는 더이상 무료가 아닙니다. ㅠㅠ
-	// 그래서 니꼬가 자체 API 를 만들었어요.
-	// 자체 URL:
-	// https://ohlcv-api.nomadcoders.workers.dev
-	// 사용을 위해서는. 파라미터로 coinId 를 추가하세요.
-	// https://ohlcv-api.nomadcoders.workers.dev?coinId=btc-bitcoin
-
-	return fetch(
-		`https://ohlcv-api.nomadcoders.workers.dev?coinId=${coinId}`
-	).then((response) => response.json());
+export async function fetchCoinInfoDev({ coinId }: { coinId: string }) {
+	const options = {
+		method: "GET",
+		headers: { accept: "application/json" },
+	};
+	try {
+		const response = await fetch(`/${coinId}.json`, options);
+		if (!response.ok && response.status !== 304) {
+			throw new Error(response.status.toString());
+		}
+		const json: ICoinInfo = await response.json();
+		return json;
+	} catch (error) {
+		console.group("[fetchCoinsInfoDev]");
+		if (error instanceof Error) {
+			console.log(`Error ${error.message}`);
+			console.groupEnd();
+			throw error;
+		} else {
+			console.log(`Error: ${error as string}`);
+			console.groupEnd();
+			throw new Error(error as string);
+		}
+	}
 }

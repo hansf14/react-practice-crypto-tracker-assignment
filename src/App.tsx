@@ -63,14 +63,16 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
   }
   body {
+    background-color: ${({ theme }) =>
+			theme.bodyBackgroundColor ? theme.bodyBackgroundColor : "#fff"};
+
+    color: ${({ theme }) =>
+			theme.bodyTextColor ? theme.bodyTextColor : "#000"};
     font-family: "Source Sans 3", sans-serif;
     font-optical-sizing: auto;
     font-weight: 500;
     font-style: normal;
     
-    background-color: ${({ theme }) =>
-			theme.keyColor01 ? theme.keyColor01 : "#fafafa"};
-    color: ${({ theme }) => (theme.keyColor02 ? theme.keyColor02 : "#000")};
     transition: color 0.1s ease-in-out, background-color 0.3s ease-in-out;
   }
   a {

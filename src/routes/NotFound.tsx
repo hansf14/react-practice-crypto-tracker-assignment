@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import Container from "@/components/Container";
 import Header from "@/components/Header";
-import Title from "@/components/Title";
+import MainTitle from "@/components/MainTitle";
 import styled from "styled-components";
 
 const Description = styled.span`
@@ -22,7 +22,7 @@ function NotFound() {
 				/>
 			</Helmet>
 			<Header>
-				<Title>Error 404</Title>
+				<MainTitle>Error 404</MainTitle>
 			</Header>
 			<Description>Error 404: Page not found.</Description>
 		</Container>

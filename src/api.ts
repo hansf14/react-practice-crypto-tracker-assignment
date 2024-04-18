@@ -183,7 +183,11 @@ export interface IMarketData {
 	total_value_locked: ICurrencyMinimal;
 	mcap_to_tvl_ratio: number;
 	fdv_to_tvl_ratio: number;
-	// roi: object
+	roi: {
+		currency: string;
+		percentage: number;
+		times: number;
+	};
 	ath: ICurrency;
 	ath_change_percentage: ICurrencyChangePercentage;
 	ath_date: ICurrencyDate;

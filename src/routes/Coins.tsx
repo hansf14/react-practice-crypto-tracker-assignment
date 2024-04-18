@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { POPULAR_COIN_IDS, fetchCoinsInfo } from "@/api";
 import Header from "@/components/Header";
 import Container from "@/components/Container";
-import Title from "@/components/Title";
+import MainTitle from "@/components/MainTitle";
 import Loader from "@/components/Loader";
 import ErrorDescription from "@/components/ErrorDescription";
 
@@ -26,11 +26,14 @@ const CoinsList = styled.ul`
 
 const Coin = styled.li`
 	background-color: ${({ theme }) =>
-		theme.keyColor05 ? theme.keyColor05 : "#fcfaf5"};
+		theme.listBoxBackgroundColor ? theme.listBoxBackgroundColor : "#fff"};
 	${({ theme }) =>
-		theme.borderStyle01 ? `border: ${theme.borderStyle01};` : ""}
+		theme.listBoxBorderStyle ? `border: ${theme.listBoxBorderStyle};` : ""}
 	border-radius: 6px;
-	color: ${({ theme }) => (theme.keyColor02 ? theme.keyColor02 : "#000")};
+
+	color: ${({ theme }) =>
+		theme.listBoxTextColor ? theme.listBoxTextColor : "#000"};
+	font-weight: bold;
 	transition: color 0.1s ease-in-out, background-color 0.3s ease-in-out;
 
 	a {
@@ -42,7 +45,8 @@ const Coin = styled.li`
 
 	&:hover {
 		a {
-			color: ${({ theme }) => (theme.keyColor07 ? theme.keyColor07 : "#333")};
+			color: ${({ theme }) =>
+				theme.listBoxHoverTextColor ? theme.listBoxHoverTextColor : "#333"};
 		}
 	}
 `;
@@ -89,7 +93,7 @@ function Coins() {
 				/>
 			</Helmet>
 			<Header>
-				<Title>Popular Coins List</Title>
+				<MainTitle>Popular Coins List</MainTitle>
 			</Header>
 			{isLoading ? (
 				<Loader>Loading...</Loader>
@@ -103,7 +107,7 @@ function Coins() {
 								to={{
 									pathname: `/${coin.id}`,
 									state: {
-										name: coin.name,
+										coinName: coin.name,
 									},
 								}}
 							>

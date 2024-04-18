@@ -21,7 +21,7 @@ export const MasonryGridInternalComponent = styled(
 	column-gap: ${({ customProps }) => customProps.columnGap};
 	row-gap: ${({ customProps }) => customProps.rowGap};
 
-	color: ${({ theme }) => (theme.keyColor08 ? theme.keyColor08 : "#000")};
+	color: ${({ theme }) => (theme.listTextColor ? theme.listTextColor : "#000")};
 
 	${({ customProps }) => `& > * {
 		width: calc(calc(100% - calc(${customProps.columnCnt - 1} * ${

@@ -86,8 +86,6 @@ export type MasonryGridItemFoundationProps =
 	React.ComponentPropsWithoutRef<MasonryGridItemBaseElementType> &
 		ExecutionProps;
 
-export interface MasonryGridItemCustomProps {}
-
 export interface MasonryGridItemProps extends MasonryGridItemFoundationProps {}
 
 ///////////////////////////////////////////////////////////////

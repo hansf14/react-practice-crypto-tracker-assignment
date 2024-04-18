@@ -18,9 +18,10 @@ export const NavBar = styled(NavBarBaseElementTypeValue)`
 	${({ theme }) =>
 		theme.navBarHeight ? `height: ${theme.navBarHeight}px;` : ""};
 	background-color: ${({ theme }) =>
-		theme.keyColor04 ? theme.keyColor04 : "transparent"};
+		theme.navBarBackgroundColor ? theme.navBarBackgroundColor : "transparent"};
 	border-bottom: 2px solid
-		${({ theme }) => (theme.keyColor09 ? theme.keyColor09 : "transparent")};
+		${({ theme }) =>
+			theme.navBarBorderColor ? theme.navBarBorderColor : "transparent"};
 	transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 
 	${CssVars.themeTogglerWidth}: 40px;
@@ -33,6 +34,8 @@ export const NavBar = styled(NavBarBaseElementTypeValue)`
 
 	display: flex;
 	justify-content: center;
+
+	z-index: 100;
 `;
 
 export const NavBarContent = styled.div`
@@ -51,13 +54,15 @@ export const Title = styled.div`
 `;
 
 const NavMenuButtonCss = css`
-	color: ${({ theme }) => (theme.keyColor03 ? theme.keyColor03 : "#333")};
+	color: ${({ theme }) =>
+		theme.navBarTextColor ? theme.navBarTextColor : "#000"};
 	font-size: 20px;
 	font-weight: bold;
 
 	transition: color 0.4s ease-in-out, filter 0.4s ease-in-out;
 	&:hover {
-		color: ${({ theme }) => (theme.keyColor06 ? theme.keyColor06 : "#553322")};
+		color: ${({ theme }) =>
+			theme.navBarHoverTextColor ? theme.navBarHoverTextColor : "#000"};
 		// filter: contrast(200%);
 	}
 `;

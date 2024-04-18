@@ -90,20 +90,20 @@ export interface ICoinInfo {
 	};
 	links: {
 		announcement_url: string[];
-		bitcointalk_thread_identifier: number;
+		bitcointalk_thread_identifier: number | null;
 		blockchain_site: string[];
 		chat_url: string[];
-		facebook_username: string;
+		facebook_username: string | null;
 		homepage: string[];
 		official_forum_url: string[];
 		repos_url: {
 			github: string[];
 			bitbucket: string[];
 		};
-		subreddit_url: string;
-		telegram_channel_identifier: string;
-		twitter_screen_name: string;
-		whitepaper: string;
+		subreddit_url: string | null;
+		telegram_channel_identifier: string | null;
+		twitter_screen_name: string | null;
+		whitepaper: string | null;
 	};
 	image: {
 		large: string;

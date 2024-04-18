@@ -26,6 +26,7 @@ import {
 	MasonryGridItem as MasonryGridItemComponent,
 } from "@/components/MasonryGrid";
 import { formatNumber } from "@/utils/formatNumber";
+import DecoratedInlineItem from "@/components/DecoratedInlineItem";
 
 const Header = styled(HeaderBase)`
 	gap: 10px;
@@ -68,7 +69,7 @@ const OverviewContainer = styled.div`
 
 	background-color: ${({ theme }) =>
 		theme.keyColor04 ? theme.keyColor04 : "#fcfaf5"};
-	padding: 10px 20px;
+	padding: 20px;
 	${({ theme }) =>
 		theme.borderStyle01 ? `border: ${theme.borderStyle01};` : ""}
 
@@ -78,35 +79,17 @@ const OverviewContainer = styled.div`
 `;
 
 const TitleCommonCss = css`
-	margin: 7px 0 15px;
+	margin-bottom: 15px;
 	font-size: 20px;
 	font-weight: bold;
 `;
 
 const NestedList = styled.ul`
-	margin-left: 10px;
+	margin-left: 5px;
 `;
 
 const NestedListItem = styled.li`
-	display: flex;
 	line-height: 1.2;
-
-	&::before {
-		display: block;
-		content: "";
-
-		margin-top: calc(calc(calc(0.5lh + 0.5cap + 0.5em) / 3) - 2px);
-		margin-right: 7px;
-
-		background-color: ${({ theme }) =>
-			theme.nestedListDecoratorColor ? theme.nestedListDecoratorColor : "#000"};
-		width: 4px;
-		height: 4px;
-		max-width: 4px;
-		min-width: 4px;
-		max-height: 4px;
-		min-height: 4px;
-	}
 `;
 
 const OverviewTitle = styled.h2`
@@ -146,10 +129,9 @@ const OverviewDetail = styled.ul.withConfig({
 	& > :nth-child(${({ customProps }) => customProps.columnCnt}n + 1) {
 		text-align: start;
 	}
-	&
-		> :not(
-			:nth-child(${({ customProps }) => customProps.columnCnt}n + 1)
-		):not(:nth-child(${({ customProps }) => customProps.columnCnt}n)) {
+	& > :not(:nth-child(${({ customProps }) =>
+		customProps.columnCnt}n + 1)):not(:nth-child(${({ customProps }) =>
+	customProps.columnCnt}n)) {
 		text-align: center;
 	}
 	& > :nth-child(${({ customProps }) => customProps.columnCnt}n) {
@@ -162,7 +144,7 @@ const ListItemCss = css`
 	font-weight: bold;
 	line-height: 1.2;
 
-	span:first-child {
+	& > span:first-child {
 		margin-right: 3px;
 		font-weight: 400;
 		text-transform: uppercase;
@@ -191,85 +173,110 @@ const MasonryGridItem = styled(MasonryGridItemComponent)`
 	${ListItemCss}
 `;
 
-const MasonryGridItemFlex = styled(MasonryGridItem)`
+const MasonryGridItemFlex = styled(MasonryGridItemComponent)`
+	${ListItemCss}
 	${ListItemFlexCss}
 `;
 
 const MasonryGrid = styled(MasonryGridComponent)`
 	${({ customProps }) => {
-		return `
-		[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"] ${MasonryGridItemFlex} {
-			align-items: flex-start;
-
-			${NestedList} {
-				display: flex;
-				flex-direction: column;
+		return css`
+			[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"]
+				${MasonryGridItemFlex} {
 				align-items: flex-start;
 
-				margin-left: 0;
+				${NestedList} {
+					display: flex;
+					flex-direction: column;
+					align-items: flex-start;
+				}
 			}
-		}
 
-		[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"] ${MasonryGridItem} {
-			text-align: left;
+			[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"]
+				${MasonryGridItem} {
+				text-align: left;
 
-			${NestedList} {
-				display: flex;
-				flex-direction: column;
-				align-items: flex-start;
+				${NestedList} {
+					display: flex;
+					flex-direction: column;
+					align-items: flex-start;
 
-				margin-left: 0;
+					${NestedListItem} {
+						text-align: left;
+					}
+				}
 			}
-		}
 
-		:not(:is([${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"], [${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"])) ${MasonryGridItemFlex} {
-			align-items: center;
-
-			${NestedList} {
-				display: flex;
-				flex-direction: column;
+			:not(
+					:is(
+							[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"],
+							[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"]
+						)
+				)
+				${MasonryGridItemFlex} {
 				align-items: center;
 
-				margin-left: 0;
+				${NestedList} {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+
+					margin-left: 0;
+
+					${NestedListItem} {
+						text-align: center;
+					}
+				}
 			}
-		}
 
-		:not(:is([${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"], [${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"])) ${MasonryGridItem} {
-			text-align: center;
+			:not(
+					:is(
+							[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"],
+							[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"]
+						)
+				)
+				${MasonryGridItem} {
+				text-align: center;
 
-			${NestedList} {
-				display: flex;
-				flex-direction: column;
-				align-items: center;
+				${NestedList} {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
 
-				margin-left: 0;
+					margin-left: 0;
+				}
 			}
-		}
 
-		[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"]  ${MasonryGridItemFlex} {
-			align-items: flex-end;
-
-			${NestedList} {
-				display: flex;
-				flex-direction: column;
+			[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"]
+				${MasonryGridItemFlex} {
 				align-items: flex-end;
 
-				margin-left: 0;
+				${NestedList} {
+					display: flex;
+					flex-direction: column;
+					align-items: flex-end;
+
+					margin-left: 0;
+
+					${NestedListItem} {
+						text-align: right;
+					}
+				}
 			}
-		}
 
-		[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"]  ${MasonryGridItem} {
-			text-align: right;
+			[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"]
+				${MasonryGridItem} {
+				text-align: right;
 
-			${NestedList} {
-				display: flex;
-				flex-direction: column;
-				align-items: flex-end;
+				${NestedList} {
+					display: flex;
+					flex-direction: column;
+					align-items: flex-end;
 
-				margin-left: 0;
+					margin-left: 0;
+				}
 			}
-		}
-	`;
+		`;
 	}}
 `;
 
@@ -283,7 +290,7 @@ const DescriptionTitle = styled.h2`
 `;
 
 const Description = styled.p`
-	margin: 0 10px 10px;
+	margin: 0 10px;
 `;
 
 const Tabs = styled.div`
@@ -412,11 +419,66 @@ function Coin() {
 
 	const descriptionEn = data?.description.en ?? null;
 
-	const hompages = data?.links.homepage ?? null;
+	const websiteLinks =
+		!data?.links.homepage ||
+		data.links.homepage.length === 0 ||
+		data.links.homepage.every((link) => link === "")
+			? null
+			: data.links.homepage.filter((link) => link.trim() !== "");
+
+	const { ids: websiteLinkKeys, keepOrExpandIds: keepOrExpandWebsiteLinkKeys } =
+		useUniqueRandomIds(websiteLinks?.length ?? 0);
+
+	useBeforeRender(() => {
+		keepOrExpandWebsiteLinkKeys(websiteLinks?.length ?? 0);
+	}, [websiteLinks?.length]);
 
 	const bitcoinForumLink =
 		typeof data?.links.bitcointalk_thread_identifier === "number"
 			? `https://bitcointalk.org/index.php?topic=${data.links.bitcointalk_thread_identifier}`
+			: null;
+
+	const facebookLink =
+		typeof data?.links.facebook_username === "string" &&
+		data.links.facebook_username !== ""
+			? `https://www.facebook.com/${data.links.facebook_username}`
+			: null;
+
+	const twitterLink =
+		typeof data?.links.twitter_screen_name === "string" &&
+		data.links.twitter_screen_name !== ""
+			? `https://twitter.com/${data.links.twitter_screen_name}`
+			: null;
+
+	const redditUrl =
+		typeof data?.links.subreddit_url === "string" &&
+		data.links.subreddit_url !== ""
+			? data.links.subreddit_url
+			: null;
+
+	const telegramLink =
+		typeof data?.links.telegram_channel_identifier === "string" &&
+		data.links.telegram_channel_identifier !== ""
+			? `https://t.me/${data.links.telegram_channel_identifier}`
+			: null;
+
+	const chatLinks =
+		!data?.links.chat_url ||
+		data.links.chat_url.length === 0 ||
+		data.links.chat_url.every((link) => link === "")
+			? null
+			: data.links.chat_url.filter((link) => link.trim() !== "");
+
+	const { ids: chatLinkKeys, keepOrExpandIds: keepOrExpandChatLinkKeys } =
+		useUniqueRandomIds(chatLinks?.length ?? 0);
+
+	useBeforeRender(() => {
+		keepOrExpandChatLinkKeys(chatLinks?.length ?? 0);
+	}, [chatLinks?.length]);
+
+	const whitepaperLink =
+		typeof data?.links.whitepaper === "string" && data.links.whitepaper !== ""
+			? data.links.whitepaper
 			: null;
 
 	const githubRepoLinks =
@@ -424,7 +486,8 @@ function Coin() {
 		data.links.repos_url.github.length === 0 ||
 		data.links.repos_url.github.every((link) => link === "")
 			? null
-			: data.links.repos_url.github;
+			: data.links.repos_url.github.filter((link) => link.trim() !== "");
+
 	const {
 		ids: githubRepoLinkKeys,
 		keepOrExpandIds: keepOrExpandGithubRepoLinkKeys,
@@ -439,7 +502,7 @@ function Coin() {
 		data.links.repos_url.bitbucket.length === 0 ||
 		data.links.repos_url.bitbucket.every((link) => link === "")
 			? null
-			: data.links.repos_url.bitbucket;
+			: data.links.repos_url.bitbucket.filter((link) => link.trim() !== "");
 
 	const {
 		ids: bitbucketRepoLinkKeys,
@@ -455,7 +518,7 @@ function Coin() {
 		data.links.blockchain_site.length === 0 ||
 		data.links.blockchain_site.every((link) => link === "")
 			? null
-			: data.links.blockchain_site;
+			: data.links.blockchain_site.filter((link) => link.trim() !== "");
 
 	const {
 		ids: blockchainSiteKeys,
@@ -465,6 +528,26 @@ function Coin() {
 	useBeforeRender(() => {
 		keepOrExpandBlockchainSiteKeys(blockchainSites?.length ?? 0);
 	}, [blockchainSites?.length]);
+
+	const officialForumLinks =
+		!data?.links.official_forum_url ||
+		data.links.official_forum_url.length === 0 ||
+		data.links.official_forum_url.every((link) => link === "")
+			? null
+			: data.links.official_forum_url.filter((link) => link.trim() !== "");
+
+	const {
+		ids: officialForumLinksKeys,
+		keepOrExpandIds: keepOrExpandofficialForumLinksKeys,
+	} = useUniqueRandomIds(officialForumLinks?.length ?? 0);
+
+	useBeforeRender(() => {
+		keepOrExpandofficialForumLinksKeys(officialForumLinks?.length ?? 0);
+	}, [officialForumLinks?.length]);
+
+	// data?.links.
+	// const
+	// https://t.me/
 
 	const columnGap = "20px";
 	const rowGap = "7px";
@@ -519,7 +602,7 @@ function Coin() {
 							}}
 						>
 							<OverviewDetailItem>
-								<span>Rank: </span>
+								<span>Market Capacity Rank: </span>
 								<span>{formattedMarketCapRank}</span>
 							</OverviewDetailItem>
 							<OverviewDetailItem>
@@ -570,14 +653,13 @@ function Coin() {
 								<MasonryGridItemFlex>
 									<span>Github Repositories</span>
 									<NestedList>
-										{githubRepoLinks.map(
-											(link, idx) =>
-												link !== "" && (
-													<NestedListItem key={githubRepoLinkKeys[idx]}>
-														<a href={link}>{link}</a>
-													</NestedListItem>
-												)
-										)}
+										{githubRepoLinks.map((link, idx) => (
+											<NestedListItem key={githubRepoLinkKeys[idx]}>
+												<DecoratedInlineItem>
+													<a href={link}>{link}</a>
+												</DecoratedInlineItem>
+											</NestedListItem>
+										))}
 									</NestedList>
 								</MasonryGridItemFlex>
 							) : (
@@ -602,14 +684,13 @@ function Coin() {
 								<MasonryGridItemFlex>
 									<span>Bitbucket Repositories</span>
 									<NestedList>
-										{bitbucketRepoLinks.map(
-											(link, idx) =>
-												link !== "" && (
-													<NestedListItem key={bitbucketRepoLinkKeys[idx]}>
-														<a href={link}>{link}</a>
-													</NestedListItem>
-												)
-										)}
+										{bitbucketRepoLinks.map((link, idx) => (
+											<NestedListItem key={bitbucketRepoLinkKeys[idx]}>
+												<DecoratedInlineItem>
+													<a href={link}>{link}</a>
+												</DecoratedInlineItem>
+											</NestedListItem>
+										))}
 									</NestedList>
 								</MasonryGridItemFlex>
 							) : (
@@ -630,15 +711,60 @@ function Coin() {
 
 					<OverviewContainer>
 						<OverviewTitle>Links</OverviewTitle>
-						<MasonryGrid customProps={{ columnCnt: 2, columnGap, rowGap }}>
-							{/* Homepage */}
-							{/* official forum */}
+						<MasonryGrid
+							customProps={{
+								// sequential: true,
+								columnCnt: 2,
+								columnGap,
+								rowGap,
+							}}
+						>
+							{websiteLinks ? (
+								<MasonryGridItemFlex>
+									<span>Websites </span>
+									<NestedList>
+										{websiteLinks.map((link, idx) => (
+											<NestedListItem key={websiteLinkKeys[idx]}>
+												<DecoratedInlineItem>
+													<a href={link}>{link}</a>
+												</DecoratedInlineItem>
+											</NestedListItem>
+										))}
+									</NestedList>
+								</MasonryGridItemFlex>
+							) : (
+								<MasonryGridItem>
+									<span>Websites: </span>
+									<span>Unknown</span>
+								</MasonryGridItem>
+							)}
+							{officialForumLinks ? (
+								<MasonryGridItemFlex>
+									<span>Official Forums </span>
+									<NestedList>
+										{officialForumLinks.map((link, idx) => (
+											<NestedListItem key={officialForumLinksKeys[idx]}>
+												<DecoratedInlineItem>
+													<a href={link}>{link}</a>
+												</DecoratedInlineItem>
+											</NestedListItem>
+										))}
+									</NestedList>
+								</MasonryGridItemFlex>
+							) : (
+								<MasonryGridItem>
+									<span>Official Forums: </span>
+									<span>Unknown</span>
+								</MasonryGridItem>
+							)}
 							{bitcoinForumLink ? (
 								<MasonryGridItemFlex>
 									<span>Bitcoin Forum </span>
 									<NestedList>
 										<NestedListItem>
-											<a href={bitcoinForumLink}>{bitcoinForumLink}</a>
+											<DecoratedInlineItem>
+												<a href={bitcoinForumLink}>{bitcoinForumLink}</a>
+											</DecoratedInlineItem>
 										</NestedListItem>
 									</NestedList>
 								</MasonryGridItemFlex>
@@ -648,25 +774,95 @@ function Coin() {
 									<span>Unknown</span>
 								</MasonryGridItem>
 							)}
+							{facebookLink ? (
+								<MasonryGridItemFlex>
+									<span>Facebook </span>
+									<NestedList>
+										<NestedListItem>
+											<DecoratedInlineItem>
+												<a href={facebookLink}>{facebookLink}</a>
+											</DecoratedInlineItem>
+										</NestedListItem>
+									</NestedList>
+								</MasonryGridItemFlex>
+							) : (
+								<MasonryGridItem>
+									<span>Facebook: </span>
+									<span>Unknown</span>
+								</MasonryGridItem>
+							)}
+							{twitterLink ? (
+								<MasonryGridItemFlex>
+									<span>Twitter </span>
+									<NestedList>
+										<NestedListItem>
+											<DecoratedInlineItem>
+												<a href={twitterLink}>{twitterLink}</a>
+											</DecoratedInlineItem>
+										</NestedListItem>
+									</NestedList>
+								</MasonryGridItemFlex>
+							) : (
+								<MasonryGridItem>
+									<span>Twitter: </span>
+									<span>Unknown</span>
+								</MasonryGridItem>
+							)}
+							{redditUrl ? (
+								<MasonryGridItemFlex>
+									<span>Reddit </span>
+									<NestedList>
+										<NestedListItem>
+											<DecoratedInlineItem>
+												<a href={redditUrl}>{redditUrl}</a>
+											</DecoratedInlineItem>
+										</NestedListItem>
+									</NestedList>
+								</MasonryGridItemFlex>
+							) : (
+								<MasonryGridItem>
+									<span>Reddit: </span>
+									<span>Unknown</span>
+								</MasonryGridItem>
+							)}
+							{telegramLink ? (
+								<MasonryGridItemFlex>
+									<span>Telegram </span>
+									<NestedList>
+										<NestedListItem>
+											<DecoratedInlineItem>
+												<a href={telegramLink}>{telegramLink}</a>
+											</DecoratedInlineItem>
+										</NestedListItem>
+									</NestedList>
+								</MasonryGridItemFlex>
+							) : (
+								<MasonryGridItem>
+									<span>Telegram: </span>
+									<span>Unknown</span>
+								</MasonryGridItem>
+							)}
 							{/* Facebook */}
 							{/* twitter */}
 							{/* reddit */}
-							{/* Chat */}
 							{/* telegram */}
+							{/* Chat */}
 							{/* whitepaper */}
 
 							{blockchainSites ? (
 								<MasonryGridItemFlex>
 									<span>Blockchain Sites </span>
 									<NestedList>
-										{blockchainSites.map(
-											(link, idx) =>
-												link !== "" && (
-													<NestedListItem key={blockchainSiteKeys[idx]}>
-														<a href={link}>{link}</a>
-													</NestedListItem>
-												)
-										)}
+										{blockchainSites.map((link, idx) => (
+											<NestedListItem key={blockchainSiteKeys[idx]}>
+												<DecoratedInlineItem>
+													<a href={link}>{link}</a>
+												</DecoratedInlineItem>
+												{/* <DecoratedInlineItem as="a" href={link}>
+													{link}
+												</DecoratedInlineItem> */}
+											</NestedListItem>
+										))}
 									</NestedList>
 								</MasonryGridItemFlex>
 							) : (

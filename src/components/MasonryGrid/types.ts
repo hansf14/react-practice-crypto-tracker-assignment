@@ -19,9 +19,11 @@ export type MasonryGridFoundationProps =
 	React.ComponentPropsWithoutRef<MasonryGridBaseElementType> & ExecutionProps;
 
 export interface MasonryGridCustomProps {
+	sequential?: boolean;
 	columnCnt: number;
 	columnGap?: string;
 	rowGap?: string;
+	forwardGridInternalComponentAs?: ExecutionProps["forwardedAs"];
 }
 
 export interface MasonryGridProps extends MasonryGridFoundationProps {
@@ -70,6 +72,23 @@ export interface MasonryGridColumnSeparatorProps
 	extends MasonryGridColumnSeparatorFoundationProps {
 	customProps: MasonryGridColumnSeparatorCustomProps;
 }
+
+///////////////////////////////////////////////////////////////
+
+export const MasonryGridItemBaseElementTypeValue = "div";
+export type MasonryGridItemBaseElementType =
+	typeof MasonryGridItemBaseElementTypeValue;
+export type MasonryGridItemBaseElement =
+	React.ElementRef<MasonryGridItemBaseElementType>;
+export type MasonryGridItemRefElement = MasonryGridItemBaseElement;
+
+export type MasonryGridItemFoundationProps =
+	React.ComponentPropsWithoutRef<MasonryGridItemBaseElementType> &
+		ExecutionProps;
+
+export interface MasonryGridItemCustomProps {}
+
+export interface MasonryGridItemProps extends MasonryGridItemFoundationProps {}
 
 ///////////////////////////////////////////////////////////////
 

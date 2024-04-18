@@ -3,11 +3,16 @@ import {
 	MasonryGridInternalComponentProps,
 	MasonryGridCustomAttributes,
 	MasonryGridColumnSeparatorProps,
+	MasonryGridItemBaseElementTypeValue,
+	MasonryGridColumnSeparatorBaseElementTypeValue,
+	MasonryGridBaseElementTypeValue,
 } from "./types";
 
 export const MasonryGrid = styled.div``;
 
-export const MasonryGridInternalComponent = styled.div.withConfig({
+export const MasonryGridInternalComponent = styled(
+	MasonryGridBaseElementTypeValue
+).withConfig({
 	shouldForwardProp: (prop) => !["customProps"].includes(prop),
 })<MasonryGridInternalComponentProps>`
 	display: flex;
@@ -35,13 +40,12 @@ export const MasonryGridInternalComponent = styled.div.withConfig({
 	}}
 `;
 
-export const MasonryGridItem = styled.div``;
+export const MasonryGridItem = styled(MasonryGridItemBaseElementTypeValue)``;
 
-export const MasonryGridColumnSeparator = styled.div.withConfig({
+export const MasonryGridColumnSeparator = styled(
+	MasonryGridColumnSeparatorBaseElementTypeValue
+).withConfig({
 	shouldForwardProp: (prop) => !["customProps"].includes(prop),
 })<MasonryGridColumnSeparatorProps>`
-	flex-grow: 1;
-
-	${({ customProps }) =>
-		!customProps.isNeeded ? "display: none;" : ""}
+	${({ customProps }) => (!customProps.isNeeded ? "display: none;" : "")}
 `;

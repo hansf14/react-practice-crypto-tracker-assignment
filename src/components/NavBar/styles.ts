@@ -1,7 +1,7 @@
 import styled, { css } from "styled-components";
 import { NavBarBaseElementTypeValue } from "./types";
 
-const CssVars = {
+export const CssVars = {
 	themeTogglerWidth: "--theme-toggler-width",
 	themeTogglerHeight: "--theme-toggler-height",
 	themeTogglerBorderWidth: "--theme-toggler-border-width",

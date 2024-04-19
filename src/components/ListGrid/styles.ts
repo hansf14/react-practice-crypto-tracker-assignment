@@ -1,5 +1,7 @@
 import styled, { css } from "styled-components";
 import { ListGridBaseElementTypeValue, ListGridProps } from "./types";
+import { ItemCss, ItemFlexCss } from "@/components/ItemCss";
+import NestedList from "@/components/NestedList";
 
 export const ListGrid = styled(ListGridBaseElementTypeValue).withConfig({
 	shouldForwardProp: (prop) => !["customProps"].includes(prop),
@@ -62,4 +64,10 @@ export const ListGrid = styled(ListGridBaseElementTypeValue).withConfig({
 	}
 `;
 
-export const ListGridItem = styled.li``;
+export const ListGridItem = styled.li`
+	${ItemCss}
+
+	&:has(${NestedList}) {
+		${ItemFlexCss}
+	}
+`;

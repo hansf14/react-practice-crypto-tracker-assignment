@@ -1,7 +1,7 @@
 // import { useParams } from "react-router-dom";
 
 import { useQuery } from "react-query";
-import { fetchCoinInfo } from "@/api";
+import { fetchCoinInfo } from "@/apis";
 import ApexChart from "react-apexcharts";
 
 interface IHistoricalData {

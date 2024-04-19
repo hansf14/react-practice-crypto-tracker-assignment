@@ -7,6 +7,8 @@ import {
 	MasonryGridColumnSeparatorBaseElementTypeValue,
 	MasonryGridBaseElementTypeValue,
 } from "./types";
+import { ItemCss, ItemFlexCss } from "@/components/ItemCss";
+import NestedList from "@/components/NestedList";
 
 export const MasonryGrid = styled.div``;
 
@@ -40,7 +42,13 @@ export const MasonryGridInternalComponent = styled(
 	}}
 `;
 
-export const MasonryGridItem = styled(MasonryGridItemBaseElementTypeValue)``;
+export const MasonryGridItem = styled(MasonryGridItemBaseElementTypeValue)`
+	${ItemCss}
+
+	&:has(${NestedList}) {
+		${ItemFlexCss}
+	}
+`;
 
 export const MasonryGridColumnSeparator = styled(
 	MasonryGridColumnSeparatorBaseElementTypeValue
@@ -48,4 +56,10 @@ export const MasonryGridColumnSeparator = styled(
 	shouldForwardProp: (prop) => !["customProps"].includes(prop),
 })<MasonryGridColumnSeparatorProps>`
 	${({ customProps }) => (!customProps.isNeeded ? "display: none;" : "")}
+
+	${ItemCss}
+
+	&:has(${NestedList}) {
+		${ItemFlexCss}
+	}
 `;

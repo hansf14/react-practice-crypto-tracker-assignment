@@ -10,7 +10,7 @@ import styled, { css } from "styled-components";
 import Price from "./Price";
 import Chart from "./Chart";
 import { useQuery } from "react-query";
-import { fetchCoinInfo, fetchCoinInfoDev } from "@/api";
+import { fetchCoinInfo, fetchCoinInfoDev } from "@/apis";
 import { Helmet } from "react-helmet-async";
 import { default as ContainerBase } from "@/components/Container";
 import { default as HeaderBase } from "@/components/Header";
@@ -23,16 +23,18 @@ import useBeforeRender from "@/hooks/useBeforeRender";
 import {
 	default as MasonryGridComponent,
 	MasonryGridCustomAttributes,
-	MasonryGridItem as MasonryGridItemComponent,
+	MasonryGridItem,
 } from "@/components/MasonryGrid";
 import { formatNumber } from "@/utils/formatNumber";
 import DecoratedInlineItem from "@/components/DecoratedInlineItem";
 import Logo, { LogoImg } from "@/components/Logo";
-import ListGrid, {
-	ListGridItem as ListGridItemComponent,
-} from "@/components/ListGrid";
-import { ItemCss, ItemFlexCss } from "@/components/ItemCss";
+import ListGrid, { ListGridItem } from "@/components/ListGrid";
 import Tabs, { Tab } from "@/components/Tabs";
+import NestedList, { NestedListItem } from "@/components/NestedList";
+import Section, { SectionTitle } from "@/components/Section";
+import { GlobalVar } from "@/settings/globalVar";
+import { RouteParamsCoin, RouteStateCoin } from "@/apis";
+import RouteOrRedirect from "@/components/RouteOrRedirect";
 
 ////////////////////////////////////////////////////////////
 // * tickers
@@ -103,6 +105,8 @@ const Container = styled(ContainerBase)`
 				theme.linkHoverTextColor ? theme.linkHoverTextColor : "#333"};
 		}
 	}
+
+	padding-bottom: 25px;
 `;
 
 ////////////////////////////////////////////////////////////
@@ -124,70 +128,6 @@ const LastUpdatedTitle = styled.span``;
 const LastUpdatedDetail = styled.span``;
 
 ////////////////////////////////////////////////////////////
-
-const NestedList = styled.ul`
-	margin-left: 5px;
-`;
-
-const NestedListItem = styled.li`
-	line-height: 1.2;
-`;
-
-////////////////////////////////////////////////////////////
-
-const SectionTitle = styled.h2`
-	margin-bottom: 15px;
-	font-size: 20px;
-	font-weight: bold;
-`;
-
-const Section = styled.section`
-	display: flex;
-	flex-direction: column;
-
-	padding: 20px;
-	${({ theme }) =>
-		theme.sectionBorderStyle ? `border: ${theme.sectionBorderStyle};` : ""}
-
-	&:not(:first-of-type) {
-		border-top: none;
-	}
-
-	&:nth-of-type(2n + 1) {
-		background-color: ${({ theme }) =>
-			theme.sectionBackgroundColor01 ? theme.sectionBackgroundColor01 : "#fff"};
-	}
-
-	&:nth-of-type(2n) {
-		background-color: ${({ theme }) =>
-			theme.sectionBackgroundColor02 ? theme.sectionBackgroundColor02 : "#fff"};
-	}
-
-	&:nth-of-type(2n + 1) ${SectionTitle} {
-		color: ${({ theme }) =>
-			theme.sectionTitleTextColor01 ? theme.sectionTitleTextColor01 : "#000"};
-	}
-`;
-
-////////////////////////////////////////////////////////////
-
-export const ListGridItem = styled(ListGridItemComponent)`
-	${ItemCss}
-
-	&:has(${NestedList}) {
-		${ItemFlexCss}
-	}
-`;
-
-////////////////////////////////////////////////////////////
-
-const MasonryGridItem = styled(MasonryGridItemComponent)`
-	${ItemCss}
-
-	&:has(${NestedList}) {
-		${ItemFlexCss}
-	}
-`;
 
 const MasonryGrid = styled(MasonryGridComponent)`
 	${({ customProps }) => {
@@ -301,19 +241,9 @@ const Description = styled.p`
 
 ////////////////////////////////////////////////////////////
 
-interface RouteParams {
-	coinId: string;
-}
-
-interface RouteState {
-	coinName: string;
-}
-
-////////////////////////////////////////////////////////////
-
 function Coin() {
-	const { coinId } = useParams<RouteParams>();
-	const { state } = useLocation<RouteState>();
+	const { coinId } = useParams<RouteParamsCoin>();
+	const { state } = useLocation<RouteStateCoin>();
 	// console.log(state.coinName);
 
 	const { isLoading, data, isError, error } = useQuery<
@@ -330,10 +260,8 @@ function Coin() {
 	);
 	console.log(data);
 
-	const priceMatch = useRouteMatch("/:coinId/price");
-	// console.log(priceMatch);
-	const chartMatch = useRouteMatch("/:coinId/chart");
-	// console.log(chartMatch);
+	const isPriceMatch = useRouteMatch("/:coinId/price") ? true : false;
+	const isChartMatch = useRouteMatch("/:coinId/chart") ? true : false;
 
 	const faviconSrcUrl = data?.symbol
 		? `https://cryptofonts.com/img/icons/${
@@ -360,6 +288,13 @@ function Coin() {
 			: "Unknown";
 
 	const symbol = data?.symbol ?? "Unknown";
+
+	const formattedCurrentPriceUsd =
+		typeof data?.market_data.current_price.usd === "number"
+			? `$${formatNumber(
+					parseFloat(data.market_data.current_price.usd.toFixed(3))
+			  )}`
+			: "Unknown";
 
 	const formattedWatchListPortfolioUserCnt =
 		typeof data?.watchlist_portfolio_users === "number"
@@ -579,73 +514,8 @@ function Coin() {
 			  )}`
 			: "Unknown";
 
-	////////////////////////////////////////////////////////
-	// Price Information
-
-	const formattedCurrentPriceUsd =
-		typeof data?.market_data.current_price.usd === "number"
-			? `$${formatNumber(
-					parseFloat(data.market_data.current_price.usd.toFixed(3))
-			  )}`
-			: "Unknown";
-
-	const formattedAth =
-		typeof data?.market_data.ath.usd === "number"
-			? `$${formatNumber(parseFloat(data.market_data.ath.usd.toFixed(3)))}`
-			: "Unknown";
-
-	let formattedAthDate: string | null = null;
-	let formattedAthTime: string | null = null;
-	if (data?.market_data.ath_date.usd) {
-		const epochTime = dateStringToEpochTime(data.market_data.ath_date.usd);
-		const { formattedDate, formattedTime } = formatDate(epochTime);
-		formattedAthDate = formattedDate;
-		formattedAthTime = formattedTime;
-	}
-	const formattedAthDateTime =
-		formattedAthDate && formattedAthTime
-			? `${formattedAthDate} ${formattedAthTime}`
-			: "Unknown";
-
-	const formattedAtl =
-		typeof data?.market_data.atl.usd === "number"
-			? `$${formatNumber(parseFloat(data.market_data.atl.usd.toFixed(3)))}`
-			: "Unknown";
-
-	let formattedAtlDate: string | null = null;
-	let formattedAtlTime: string | null = null;
-	if (data?.market_data.atl_date.usd) {
-		const epochTime = dateStringToEpochTime(data.market_data.atl_date.usd);
-		const { formattedDate, formattedTime } = formatDate(epochTime);
-		formattedAtlDate = formattedDate;
-		formattedAtlTime = formattedTime;
-	}
-	const formattedAtlDateTime =
-		formattedAtlDate && formattedAtlTime
-			? `${formattedAtlDate} ${formattedAtlTime}`
-			: "Unknown";
-
-	const formattedHigh24hPrice =
-		typeof data?.market_data.high_24h.usd === "number"
-			? `$${formatNumber(parseFloat(data.market_data.high_24h.usd.toFixed(3)))}`
-			: "Unknown";
-
-	const formattedLow24hPrice =
-		typeof data?.market_data.low_24h.usd === "number"
-			? `$${formatNumber(parseFloat(data.market_data.low_24h.usd.toFixed(3)))}`
-			: "Unknown";
-
-	// [4] Price Change and Percentage Change
-	// const formattedAthChangePercentage = ;
-	// const formattedAtlChangePercentage = ;
-
-	// price change
-	// price change percentage
-	// market cap change
-	// market cap change percentage
-
-	const columnGap = "20px";
-	const rowGap = "7px";
+	const columnGap = GlobalVar.defaultColumnGap;
+	const rowGap = GlobalVar.defaultRowGap;
 
 	return (
 		<Container>
@@ -690,8 +560,8 @@ function Coin() {
 						<ListGrid
 							customProps={{
 								columnCnt: 3,
-								columnGap: columnGap,
-								rowGap: rowGap,
+								columnGap,
+								rowGap,
 							}}
 						>
 							<ListGridItem>
@@ -1028,8 +898,8 @@ function Coin() {
 						<ListGrid
 							customProps={{
 								columnCnt: 3,
-								columnGap: columnGap,
-								rowGap: rowGap,
+								columnGap,
+								rowGap,
 							}}
 						>
 							<ListGridItem>
@@ -1054,8 +924,8 @@ function Coin() {
 						<ListGrid
 							customProps={{
 								columnCnt: 2,
-								columnGap: columnGap,
-								rowGap: rowGap,
+								columnGap,
+								rowGap,
 							}}
 						>
 							<ListGridItem>
@@ -1080,54 +950,8 @@ function Coin() {
 						</ListGrid>
 					</Section>
 
-					<Section>
-						<SectionTitle>Price Information</SectionTitle>
-						<ListGrid
-							customProps={{
-								columnCnt: 2,
-								columnGap: columnGap,
-								rowGap: rowGap,
-							}}
-						>
-							<ListGridItem data-grid-item-span-2 data-grid-item-align-left>
-								<span>Current Price: </span>
-								<span>{formattedCurrentPriceUsd}</span>
-							</ListGridItem>
-
-							<ListGridItem data-grid-item-align-left>
-								<span>ATH Price: </span>
-								<span>{formattedAth}</span>
-							</ListGridItem>
-
-							<ListGridItem data-grid-item-align-right>
-								<span>ATH Date: </span>
-								<span>{formattedAthDateTime}</span>
-							</ListGridItem>
-
-							<ListGridItem data-grid-item-align-left>
-								<span>ATL Price: </span>
-								<span>{formattedAtl}</span>
-							</ListGridItem>
-
-							<ListGridItem data-grid-item-align-right>
-								<span>ATL Date: </span>
-								<span>{formattedAtlDateTime}</span>
-							</ListGridItem>
-
-							<ListGridItem data-grid-item-align-left>
-								<span>The Highest Price (24h): </span>
-								<span>{formattedHigh24hPrice}</span>
-							</ListGridItem>
-
-							<ListGridItem data-grid-item-align-right>
-								<span>The Lowest Price (24h): </span>
-								<span>{formattedLow24hPrice}</span>
-							</ListGridItem>
-						</ListGrid>
-					</Section>
-
 					<Tabs>
-						<Tab customProps={{ isActive: priceMatch !== null }}>
+						<Tab customProps={{ isActive: isPriceMatch }}>
 							<Link
 								to={{
 									pathname: `/${coinId}/price`,
@@ -1139,7 +963,7 @@ function Coin() {
 								Price
 							</Link>
 						</Tab>
-						<Tab customProps={{ isActive: chartMatch !== null }}>
+						<Tab customProps={{ isActive: isChartMatch }}>
 							<Link
 								to={{
 									pathname: `/${coinId}/chart`,
@@ -1154,12 +978,17 @@ function Coin() {
 					</Tabs>
 
 					<Switch>
-						<Route path={`/:coinId/price`}>
+						<Route exact path={`/:coinId`}></Route>
+						<RouteOrRedirect exact path={`/:coinId/price`}>
 							<Price />
-						</Route>
-						<Route path={`/:coinId/chart`}>
+						</RouteOrRedirect>
+						<RouteOrRedirect
+							exact
+							path={`/:coinId/chart`}
+							customProps={{ redirectWhenNotMatch: true }}
+						>
 							<Chart coinId={coinId} />
-						</Route>
+						</RouteOrRedirect>
 					</Switch>
 				</>
 			)}

@@ -15,18 +15,19 @@ export const Tabs = styled(TabsBaseElementTypeValue)`
 export const Tab = styled(TabBaseElementTypeValue).withConfig({
 	shouldForwardProp: (prop) => !["customProps"].includes(prop),
 })<TabProps>`
-	text-align: center;
-	text-transform: uppercase;
-	font-size: 13px;
-	font-weight: bold;
-	background-color: rgba(0, 0, 0, 0.5);
 	padding: 7px 0px;
+
 	background-color: ${({ customProps, theme }) =>
 		typeof customProps?.isActive === "boolean"
 			? customProps?.isActive
 				? theme.tabActiveBackgroundColor
 				: theme.tabBackgroundColor
 			: "#000"};
+
+	text-align: center;
+	text-transform: uppercase;
+	font-size: 13px;
+	font-weight: bold;
 
 	a {
 		display: block;

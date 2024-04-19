@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { NavBarProps, NavBarRefElement } from "./types";
 import * as Styles from "./styles";
 import useThemeContext from "@/hooks/useThemeContext";
-import { darkTheme, lightTheme } from "@/theme";
+import { darkTheme, lightTheme } from "@/themes";
 export * from "./types";
 
 const NavBar = React.memo(

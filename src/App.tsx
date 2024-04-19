@@ -1,9 +1,9 @@
 import { ThemeProvider, createGlobalStyle } from "styled-components";
-import Router from "./Router";
 import { Helmet } from "react-helmet-async";
 import { ReactQueryDevtools } from "react-query/devtools";
+import Router from "@/routes/Router";
 import useThemeContext from "@/hooks/useThemeContext";
-import { lightTheme } from "@/theme";
+import { lightTheme } from "@/themes";
 
 /* @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap'); */
 const GlobalStyle = createGlobalStyle`

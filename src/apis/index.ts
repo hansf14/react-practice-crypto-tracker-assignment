@@ -1,3 +1,5 @@
+import { ConstraintParamsExamineFnType } from "@/components/RouteOrRedirect/types.";
+
 export const BASE_URL = "https://api.coingecko.com/api/v3/coins" as const;
 export const LOCAL_BASE_URL = process.env.PUBLIC_URL;
 
@@ -302,6 +304,64 @@ export interface ICurrencyChangePercentage extends ICurrency {}
 
 export type ICurrencyDate = {
 	[K in keyof ICurrency]: string;
+};
+
+////////////////////////////////////////////////////////////
+
+// export type RouteParamsType<
+// 	P extends { [K in keyof P]?: string | undefined } = {}
+// > = match<P>["params"];
+
+// export type RouteParamsType<P> = P extends match<infer Params> ? Params : never;
+
+// export type RouteParamsType = {
+// 	[K in string]: string;
+// };
+
+export type RouteParamsType = {
+	[K: string]: string;
+};
+
+// export interface RouteParamsType {
+// 	[K: string]: string;
+// }
+
+// export type RouteParamsType = Record<string, string>;
+
+////////////////////////////////////////////////////////////
+
+// export interface RouteParamsCoin {
+// 	coinId: string;
+// }
+
+export type RouteParamsCoin = {
+	coinId: string;
+};
+
+export interface RouteStateCoin {
+	coinName: string;
+}
+
+////////////////////////////////////////////////////////////
+
+export interface RouteParamsChart extends RouteParamsCoin {}
+
+export interface RouteStateChart extends ICoinInfo {}
+
+////////////////////////////////////////////////////////////
+
+export interface RouteParamsChart extends RouteParamsCoin {}
+
+export interface RouteParamsChart extends ICoinInfo {}
+
+export const ConstraintParamsCoin = {
+	coinId: POPULAR_COIN_IDS,
+} as const;
+
+export const constraintParamsExamineFnCoin: ConstraintParamsExamineFnType<
+	RouteParamsCoin
+> = ({ constraintParams, params }) => {
+	return constraintParams.coinId.includes(params.coinId);
 };
 
 export async function fetchCoinsInfo() {

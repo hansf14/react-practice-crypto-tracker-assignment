@@ -26,10 +26,10 @@ const RouteOrRedirect = <P extends RouteParamsType = {}>({
 			? constraintParamsExamineFn({ constraintParams, params: matchObj.params })
 			: isMatch;
 
-	console.log("shouldBeExact:", shouldBeExact);
-	console.log("redirectWhenNotMatch:", redirectWhenNotMatch);
-	console.log("matchObj:", matchObj);
-	console.log("isMatch:", isMatch);
+	// console.log("shouldBeExact:", shouldBeExact);
+	// console.log("redirectWhenNotMatch:", redirectWhenNotMatch);
+	// console.log("matchObj:", matchObj);
+	// console.log("isMatch:", isMatch);
 
 	return (
 		<>

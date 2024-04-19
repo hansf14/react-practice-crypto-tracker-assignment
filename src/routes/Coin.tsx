@@ -237,6 +237,11 @@ const Description = styled.p`
 	margin: 0 10px;
 
 	font-size: 14px;
+
+	a {
+		color: ${({ theme }) =>
+			theme.linkHoverTextColor ? theme.linkHoverTextColor : "#000"};
+	}
 `;
 
 ////////////////////////////////////////////////////////////
@@ -292,7 +297,7 @@ function Coin() {
 	const formattedCurrentPriceUsd =
 		typeof data?.market_data.current_price.usd === "number"
 			? `$${formatNumber(
-					parseFloat(data.market_data.current_price.usd.toFixed(3))
+					parseFloat(data.market_data.current_price.usd.toFixed(2))
 			  )}`
 			: "Unknown";
 
@@ -303,12 +308,16 @@ function Coin() {
 
 	const formattedSentimentVotesUpPercentage =
 		typeof data?.sentiment_votes_up_percentage === "number"
-			? `${formatNumber(data.sentiment_votes_up_percentage)}%`
+			? `${formatNumber(
+					parseFloat(data.sentiment_votes_up_percentage.toFixed(2))
+			  )}%`
 			: "Unknown";
 
 	const formattedSentimentVotesDownPercentage =
 		typeof data?.sentiment_votes_down_percentage === "number"
-			? `${formatNumber(data.sentiment_votes_up_percentage)}%`
+			? `${formatNumber(
+					parseFloat(data.sentiment_votes_down_percentage.toFixed(2))
+			  )}%`
 			: "Unknown";
 
 	const formattedTwitterFollowerCnt =
@@ -474,7 +483,9 @@ function Coin() {
 
 	const formattedMarketCap =
 		typeof data?.market_data.market_cap.usd === "number"
-			? `$${formatNumber(data.market_data.market_cap.usd)}`
+			? `$${parseFloat(
+					formatNumber(data.market_data.market_cap.usd.toFixed(2))
+			  )}`
 			: "Unknown";
 
 	const formattedMarketCapRank =
@@ -485,7 +496,7 @@ function Coin() {
 	const formattedFullyDilutedValuation =
 		typeof data?.market_data.fully_diluted_valuation.usd === "number"
 			? `$${formatNumber(
-					parseFloat(data.market_data.fully_diluted_valuation.usd.toFixed(3))
+					parseFloat(data.market_data.fully_diluted_valuation.usd.toFixed(2))
 			  )}`
 			: "Unknown";
 
@@ -494,23 +505,25 @@ function Coin() {
 
 	const formattedTotalVolume =
 		typeof data?.market_data.total_volume.usd === "number"
-			? `$${formatNumber(data.market_data.total_volume.usd)}`
+			? `$${parseFloat(
+					formatNumber(data.market_data.total_volume.usd.toFixed(2))
+			  )}`
 			: "Unknown";
 
 	const formattedTotalSupply =
 		typeof data?.market_data.total_supply === "number"
-			? `$${formatNumber(data.market_data.total_supply)}`
+			? `$${parseFloat(formatNumber(data.market_data.total_supply.toFixed(2)))}`
 			: "Unknown";
 
 	const formattedMaxSupply =
 		typeof data?.market_data.max_supply === "number"
-			? `$${formatNumber(data.market_data.max_supply)}`
+			? `$${parseFloat(formatNumber(data.market_data.max_supply.toFixed(2)))}`
 			: "Unknown";
 
 	const formattedCirculatingSupply =
 		typeof data?.market_data.circulating_supply === "number"
 			? `$${formatNumber(
-					parseFloat(data.market_data.circulating_supply.toFixed(3))
+					parseFloat(data.market_data.circulating_supply.toFixed(2))
 			  )}`
 			: "Unknown";
 
@@ -689,7 +702,9 @@ function Coin() {
 					{descriptionEn && (
 						<Section>
 							<SectionTitle>Description</SectionTitle>
-							<Description>{descriptionEn}</Description>
+							<Description
+								dangerouslySetInnerHTML={{ __html: descriptionEn }}
+							/>
 						</Section>
 					)}
 

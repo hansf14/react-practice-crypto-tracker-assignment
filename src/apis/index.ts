@@ -344,9 +344,9 @@ export interface RouteStateCoin {
 
 ////////////////////////////////////////////////////////////
 
-export interface RouteParamsChart extends RouteParamsCoin {}
+export interface RouteParamsPrice extends RouteParamsCoin {}
 
-export interface RouteStateChart extends ICoinInfo {}
+export interface RouteStatePrice extends ICoinInfo {}
 
 ////////////////////////////////////////////////////////////
 
@@ -432,7 +432,7 @@ export async function fetchCoinInfo({ coinId }: { coinId: string }) {
 		const json: ICoinInfo = await response.json();
 		return json;
 	} catch (error) {
-		console.group("[fetchCoinsInfo]");
+		console.group("[fetchCoinInfo]");
 		if (error instanceof Error) {
 			console.log(`Error ${error.message}`);
 		} else {
@@ -461,7 +461,7 @@ export async function fetchCoinInfoDev({ coinId }: { coinId: string }) {
 		const json: ICoinInfo = await response.json();
 		return json;
 	} catch (error) {
-		console.group("[fetchCoinsInfoDev]");
+		console.group("[fetchCoinInfoDev]");
 		if (error instanceof Error) {
 			console.log(`Error ${error.message}`);
 			console.groupEnd();

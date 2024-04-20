@@ -1,11 +1,19 @@
 import styled from "styled-components";
 
+export const NestedListCssVars = {
+	marginLeft: "--nested-list-margin-left",
+	lineHeight: "--nested-list-line-height",
+};
+
 const NestedList = styled.ul`
-	margin-left: 5px;
+	${NestedListCssVars.marginLeft}: 6px;
+	${NestedListCssVars.lineHeight}: 1.2;
+
+	margin-left: var(${NestedListCssVars.marginLeft}, 0);
 `;
 
 export const NestedListItem = styled.li`
-	line-height: 1.2;
+	line-height: var(${NestedListCssVars.lineHeight}, normal);
 `;
 
 export default NestedList;

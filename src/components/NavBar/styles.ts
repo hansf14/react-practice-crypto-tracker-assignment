@@ -1,7 +1,7 @@
 import styled, { css } from "styled-components";
 import { NavBarBaseElementTypeValue } from "./types";
 
-export const CssVars = {
+export const NavBarCssVars = {
 	themeTogglerWidth: "--theme-toggler-width",
 	themeTogglerHeight: "--theme-toggler-height",
 	themeTogglerBorderWidth: "--theme-toggler-border-width",
@@ -9,7 +9,7 @@ export const CssVars = {
 	themeTogglerInnerHeight: "--theme-toggler-inner-height",
 	themeTogglerSwitchWidth: "--theme-toggler-switch-width",
 	themeTogglerSwitchHeight: "--theme-toggler-switch-height",
-};
+} as const;
 
 export const NavBar = styled(NavBarBaseElementTypeValue)`
 	position: fixed;
@@ -24,13 +24,13 @@ export const NavBar = styled(NavBarBaseElementTypeValue)`
 			theme.navBarBorderColor ? theme.navBarBorderColor : "transparent"};
 	transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 
-	${CssVars.themeTogglerWidth}: 40px;
-	${CssVars.themeTogglerHeight}: 22px;
-	${CssVars.themeTogglerBorderWidth}: 2px;
-	${CssVars.themeTogglerInnerWidth}: calc(var(${CssVars.themeTogglerWidth}) - 2 * var(${CssVars.themeTogglerBorderWidth}));
-	${CssVars.themeTogglerInnerHeight}: calc(var(${CssVars.themeTogglerHeight}) - 2 * var(${CssVars.themeTogglerBorderWidth}));
-	${CssVars.themeTogglerSwitchHeight}: var(${CssVars.themeTogglerInnerHeight});
-	${CssVars.themeTogglerSwitchWidth}: var(${CssVars.themeTogglerSwitchHeight});
+	${NavBarCssVars.themeTogglerWidth}: 40px;
+	${NavBarCssVars.themeTogglerHeight}: 22px;
+	${NavBarCssVars.themeTogglerBorderWidth}: 2px;
+	${NavBarCssVars.themeTogglerInnerWidth}: calc(var(${NavBarCssVars.themeTogglerWidth}) - 2 * var(${NavBarCssVars.themeTogglerBorderWidth}));
+	${NavBarCssVars.themeTogglerInnerHeight}: calc(var(${NavBarCssVars.themeTogglerHeight}) - 2 * var(${NavBarCssVars.themeTogglerBorderWidth}));
+	${NavBarCssVars.themeTogglerSwitchHeight}: var(${NavBarCssVars.themeTogglerInnerHeight});
+	${NavBarCssVars.themeTogglerSwitchWidth}: var(${NavBarCssVars.themeTogglerSwitchHeight});
 
 	display: flex;
 	justify-content: center;
@@ -92,10 +92,10 @@ export const ThemeToggler = styled.div`
 	position: relative;
 	cursor: pointer;
 
-	width: var(${CssVars.themeTogglerWidth});
-	height: var(${CssVars.themeTogglerHeight});
-	border: var(${CssVars.themeTogglerBorderWidth}) solid #fff;
-	border-radius: calc(var(${CssVars.themeTogglerHeight}) / 2);
+	width: var(${NavBarCssVars.themeTogglerWidth});
+	height: var(${NavBarCssVars.themeTogglerHeight});
+	border: var(${NavBarCssVars.themeTogglerBorderWidth}) solid #fff;
+	border-radius: calc(var(${NavBarCssVars.themeTogglerHeight}) / 2);
 	background-color: #8cbae8;
 `;
 
@@ -107,8 +107,8 @@ export const ThemeSwitch = styled.div.withConfig({
 	};
 }>`
 	position: absolute;
-	width: var(${CssVars.themeTogglerSwitchWidth});
-	height: var(${CssVars.themeTogglerSwitchHeight});
+	width: var(${NavBarCssVars.themeTogglerSwitchWidth});
+	height: var(${NavBarCssVars.themeTogglerSwitchHeight});
 	background-color: #1976d2;
 	border-radius: 50%;
 
@@ -116,7 +116,7 @@ export const ThemeSwitch = styled.div.withConfig({
 		${({ customProps }) =>
 			customProps.isLeft
 				? "0"
-				: `calc(var(${CssVars.themeTogglerInnerWidth}) - var(${CssVars.themeTogglerSwitchWidth}))`},
+				: `calc(var(${NavBarCssVars.themeTogglerInnerWidth}) - var(${NavBarCssVars.themeTogglerSwitchWidth}))`},
 		0
 	);
 	transition: transform 0.2s ease-in-out;

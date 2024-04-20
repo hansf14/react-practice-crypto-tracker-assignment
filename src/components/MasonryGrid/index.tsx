@@ -206,7 +206,7 @@ const MasonryGrid = React.memo(
 				// 	gridInternalComponentBaseElementInfo
 				// );
 
-				let columnHeights: number[] = [];
+				const columnHeights = Array<number>(columnCnt).fill(0);
 				let maxHeight = 0;
 
 				if (sequential) {
@@ -230,22 +230,22 @@ const MasonryGrid = React.memo(
 
 					for (; gridItemIdx < gridItemTotalCnt; gridItemIdx++) {
 						const minHeight = Math.min(...columnHeights);
-						const minHeightColumnIdx = columnHeights.findIndex(
+						const minHeightColIdx = columnHeights.findIndex(
 							(height) => height === minHeight
 						);
 
 						const currentGridItem = gridItems[gridItemIdx].element;
 						currentGridItem.setAttribute(
 							MasonryGridCustomAttributes.dataMasonryGridColumnNumber,
-							(minHeightColumnIdx + 1).toString()
+							(minHeightColIdx + 1).toString()
 						);
 
-						columnHeights[minHeightColumnIdx] +=
+						columnHeights[minHeightColIdx] +=
 							rowGap + gridItems[gridItemIdx].verticalSpace;
 
 						// console.log("gridItemIdx:", gridItemIdx);
 						// console.log("verticalSpace:", gridItems[gridItemIdx].verticalSpace);
-						// console.log("minHeightColumnIdx:", minHeightColumnIdx);
+						// console.log("minHeightColIdx:", minHeightColIdx);
 						// console.log(columnHeights);
 					}
 
@@ -265,31 +265,28 @@ const MasonryGrid = React.memo(
 						`${gridInternalComponentBaseElementHeight}px`
 					);
 				} else {
-					const columns = Array.from<
-						{
-							columnIdx: number | null;
-							heightSum: number;
-							gridItems: {
-								domOrderIdx: number;
-								element: HTMLElement;
-								verticalSpace: number;
-							}[];
-						},
-						{
-							columnIdx: number | null;
-							heightSum: number;
-							gridItems: {
-								domOrderIdx: number;
-								element: HTMLElement;
-								verticalSpace: number;
-							}[];
-						}
-					>({ length: columnCnt }, () => ({
-						columnIdx: null,
-						heightSum: 0,
-						gridItems: [],
-					}));
+					type GridItem = {
+						domOrderIdx: number;
+						element: HTMLElement;
+						verticalSpace: number;
+					};
+					type Column = {
+						minDomOrderIdx: number | null;
+						heightSum: number;
+						gridItems: GridItem[];
+					};
+					function createEmptyColumn(): Column {
+						return {
+							minDomOrderIdx: null,
+							heightSum: 0,
+							gridItems: [],
+						};
+					}
 
+					const columns = Array.from<Column, Column>(
+						{ length: columnCnt },
+						() => createEmptyColumn()
+					);
 					// console.log("columns:", columns);
 
 					// Clone the gridItems with a name descendingOrderGridItems then
@@ -332,6 +329,7 @@ const MasonryGrid = React.memo(
 							descendingOrderGridItems[
 								descendingOrderGridItemsIdx
 							].verticalSpace;
+						columnHeights[tmpColIdx] = columns[tmpColIdx].heightSum;
 
 						// console.log("tmpColIdx:", tmpColIdx);
 						// console.log("columns[tmpColIdx]:", columns[tmpColIdx]);
@@ -352,15 +350,14 @@ const MasonryGrid = React.memo(
 						descendingOrderGridItemsIdx++
 					) {
 						// Find the column with the smallest heightSum
-						const columnHeights = columns.map((column) => column.heightSum);
 						const minColumnHeight = Math.min(...columnHeights);
-						const smallestColumnTempIdx = columns.findIndex(
+						const minHeightColTmpColIdx = columns.findIndex(
 							(column) => column.heightSum === minColumnHeight
 						);
 
 						// console.log("columnHeights:", columnHeights);
 
-						columns[smallestColumnTempIdx].gridItems.push({
+						columns[minHeightColTmpColIdx].gridItems.push({
 							domOrderIdx:
 								descendingOrderGridItems[descendingOrderGridItemsIdx]
 									.domOrderIdx,
@@ -370,10 +367,12 @@ const MasonryGrid = React.memo(
 								descendingOrderGridItems[descendingOrderGridItemsIdx]
 									.verticalSpace,
 						});
-						columns[smallestColumnTempIdx].heightSum +=
+						columns[minHeightColTmpColIdx].heightSum +=
 							rowGap +
 							descendingOrderGridItems[descendingOrderGridItemsIdx]
 								.verticalSpace;
+						columnHeights[minHeightColTmpColIdx] =
+							columns[minHeightColTmpColIdx].heightSum;
 
 						// console.log(
 						// 	"descendingOrderGridItemsIdx:",
@@ -390,66 +389,39 @@ const MasonryGrid = React.memo(
 
 					// console.log("columns:", columns);
 
-					const minDomOrderIdxArr: {
-						tmpColIdx: number;
-						minDomOrderIdx: number;
-					}[] = [];
 					for (let tmpColIdx = 0; tmpColIdx < columnCnt; tmpColIdx++) {
-						const domOrderIdxArr = columns[tmpColIdx].gridItems.map(
-							(gridItem) => gridItem.domOrderIdx
-						);
-						const minDomOrderIdx = Math.min(...domOrderIdxArr);
-						minDomOrderIdxArr.push({
-							tmpColIdx,
-							minDomOrderIdx,
-						});
+						if (columns[tmpColIdx].gridItems.length === 0) {
+							columns[tmpColIdx].minDomOrderIdx = gridItemTotalCnt; // max value
+						} else {
+							const minDomOrderIdx = Math.min(
+								...columns[tmpColIdx].gridItems.map(
+									(gridItem) => gridItem.domOrderIdx
+								)
+							);
+							columns[tmpColIdx].minDomOrderIdx = minDomOrderIdx;
+						}
 					}
 
 					// Sort in minDomOrderIdx ascending order
-					minDomOrderIdxArr.sort(
-						(minDomOrderIdxInColumn1, minDomOrderIdxArrInColumn2) =>
-							minDomOrderIdxInColumn1.minDomOrderIdx -
-							minDomOrderIdxArrInColumn2.minDomOrderIdx
+					columns.sort(
+						(column1, column2) =>
+							column1.minDomOrderIdx! - column2.minDomOrderIdx!
 					);
-					minDomOrderIdxArr.forEach((column, domOrderIdx) => {
-						columns[column.tmpColIdx].columnIdx = domOrderIdx;
-					});
 
-					// Sort the columns in minDomIdx ascending order.
-					// domOrderColumns.length <= columns.length
-					const domOrderColumns = columns
-						.filter((column) => column.columnIdx !== null)
-						.sort(
-							(column1, column2) => column1.columnIdx! - column2.columnIdx!
-						);
-					if (domOrderColumns.length < columns.length) {
-						for (
-							let colIdx = domOrderColumns.length;
-							colIdx < columns.length;
-							colIdx++
-						) {
-							domOrderColumns[colIdx] = {
-								columnIdx: colIdx,
-								gridItems: [],
-								heightSum: 0,
-							};
-						}
-					}
-					// Now, domOrderColumns.length == columns.length
+					columns.forEach((column, colIdx) => {
+						// Update the `columnHeights` order to be in sync with `domOrderColumns`
+						columnHeights[colIdx] = column.heightSum;
 
-					domOrderColumns.forEach((column) => {
+						// Set column attribute for every gridItem
 						column.gridItems.forEach((gridItem) => {
 							gridItem.element.setAttribute(
 								MasonryGridCustomAttributes.dataMasonryGridColumnNumber,
-								(column.columnIdx! + 1).toString()
+								(colIdx + 1).toString()
 							);
 						});
 					});
 
-					const domOrderColumnHeights = domOrderColumns.map(
-						(column) => column.heightSum
-					);
-					maxHeight = Math.max(...domOrderColumnHeights);
+					maxHeight = Math.max(...columnHeights);
 
 					const gridInternalComponentBaseElementHeight =
 						maxHeight +
@@ -464,9 +436,13 @@ const MasonryGrid = React.memo(
 						"min-height",
 						`${gridInternalComponentBaseElementHeight}px`
 					);
-
-					columnHeights = domOrderColumns.map((column) => column.heightSum);
 				}
+
+				const maxHeightColIdx = columnHeights.findIndex(
+					(height) => height === maxHeight
+				);
+				console.log("columnHeights:", columnHeights);
+				console.log("maxHeightColIdx:", maxHeightColIdx);
 
 				for (
 					let separatorIdx = 0;
@@ -485,19 +461,24 @@ const MasonryGrid = React.memo(
 					);
 
 					arrIsSeparatorNeededRef.current[separatorIdx] =
-						Math.round(columnHeights[colIdx] + rowGap) < Math.round(maxHeight)
+						colIdx === maxHeightColIdx
+							? false
+							: columnHeights[colIdx] + rowGap < maxHeight
 							? true
 							: false;
 
-					if (arrIsSeparatorNeededRef.current[colIdx]) {
+					console.log(arrIsSeparatorNeededRef.current);
+
+					if (arrIsSeparatorNeededRef.current[separatorIdx]) {
 						const separatorHeight =
-							Math.round(maxHeight) -
-							Math.round(columnHeights[colIdx] + rowGap) -
-							1;
+							maxHeight - (columnHeights[colIdx] + rowGap);
 						separator.style.setProperty("height", `${separatorHeight}px`);
+					} else {
+						separator.style.setProperty("display", "none");
 					}
 				}
 
+				// console.log(columnHeights);
 				// console.log(arrIsSeparatorNeededRef.current);
 				rerender((prev) => (prev > 1000 ? 0 : prev + 1));
 			}, [
@@ -524,10 +505,14 @@ const MasonryGrid = React.memo(
 					animationFrame = requestAnimationFrame(layout);
 				});
 				if (resizeObserver) {
-					(
+					const gridItemTotalCnt =
+						gridInternalComponentBaseElement.children.length - separatorCnt;
+
+					const gridItems = (
 						[...gridInternalComponentBaseElement.children] as HTMLElement[]
-					).forEach((child) => resizeObserver.observe(child));
-					resizeObserver.observe(gridInternalComponentBaseElement);
+					).slice(0, gridItemTotalCnt);
+
+					gridItems.forEach((child) => resizeObserver.observe(child));
 				}
 
 				layout();
@@ -538,9 +523,7 @@ const MasonryGrid = React.memo(
 					}
 					resizeObserver?.disconnect();
 				};
-			}, [layout]);
-
-			// console.log(arrIsSeparatorNeededRef.current);
+			}, [separatorCnt, layout]);
 
 			return (
 				<Styles.MasonryGrid ref={gridBaseElementRef}>

@@ -135,26 +135,12 @@ const MasonryGrid = styled(MasonryGridComponent)`
 			[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"]
 				${MasonryGridItem} {
 				align-items: flex-start;
-
-				${NestedList} {
-					display: flex;
-					flex-direction: column;
-					align-items: flex-start;
-				}
-			}
-
-			[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"]
-				${MasonryGridItem} {
 				text-align: left;
 
 				${NestedList} {
 					display: flex;
 					flex-direction: column;
 					align-items: flex-start;
-
-					${NestedListItem} {
-						text-align: left;
-					}
 				}
 			}
 
@@ -166,65 +152,24 @@ const MasonryGrid = styled(MasonryGridComponent)`
 				)
 				${MasonryGridItem} {
 				align-items: center;
-
-				${NestedList} {
-					display: flex;
-					flex-direction: column;
-					align-items: center;
-
-					margin-left: 0;
-
-					${NestedListItem} {
-						text-align: center;
-					}
-				}
-			}
-
-			:not(
-					:is(
-							[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="1"],
-							[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"]
-						)
-				)
-				${MasonryGridItem} {
 				text-align: center;
 
 				${NestedList} {
 					display: flex;
 					flex-direction: column;
 					align-items: center;
-
-					margin-left: 0;
 				}
 			}
 
 			[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"]
 				${MasonryGridItem} {
 				align-items: flex-end;
-
-				${NestedList} {
-					display: flex;
-					flex-direction: column;
-					align-items: flex-end;
-
-					margin-left: 0;
-
-					${NestedListItem} {
-						text-align: right;
-					}
-				}
-			}
-
-			[${MasonryGridCustomAttributes.dataMasonryGridColumnNumber}="${customProps.columnCnt}"]
-				${MasonryGridItem} {
 				text-align: right;
 
 				${NestedList} {
 					display: flex;
 					flex-direction: column;
 					align-items: flex-end;
-
-					margin-left: 0;
 				}
 			}
 		`;

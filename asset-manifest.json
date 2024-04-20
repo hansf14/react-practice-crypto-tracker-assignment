@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/react-practice-crypto-tracker-assignment/static/js/main.b37aa2b4.js",
+    "main.js": "/react-practice-crypto-tracker-assignment/static/js/main.ef279e24.js",
     "index.html": "/react-practice-crypto-tracker-assignment/index.html",
-    "main.b37aa2b4.js.map": "/react-practice-crypto-tracker-assignment/static/js/main.b37aa2b4.js.map"
+    "main.ef279e24.js.map": "/react-practice-crypto-tracker-assignment/static/js/main.ef279e24.js.map"
   },
   "entrypoints": [
-    "static/js/main.b37aa2b4.js"
+    "static/js/main.ef279e24.js"
   ]
 }

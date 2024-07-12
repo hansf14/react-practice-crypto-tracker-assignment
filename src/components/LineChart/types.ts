@@ -13,7 +13,7 @@ export type LineChartFoundationProps =
 	React.ComponentPropsWithoutRef<LineChartBaseElementType> & ExecutionProps;
 
 export interface LineChartCustomProps {
-	chartProps: ApexChartProps;
+	chartCustomProps: ApexChartProps;
 }
 
 export interface LineChartProps extends LineChartFoundationProps {

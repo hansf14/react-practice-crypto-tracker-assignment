@@ -9,6 +9,7 @@ import { merge } from "lodash";
 import * as Styles from "./styles";
 import {
 	ApexChartBaseElement,
+	ApexChartProps,
 	LineChartBaseElement,
 	LineChartHandle,
 	LineChartProps,
@@ -21,9 +22,10 @@ const LineChart = React.memo(
 			const lineChartBaseElementRef = useRef<LineChartBaseElement | null>(null);
 			const lineChartInternalComponentBaseElementRef =
 				useRef<ApexChartBaseElement | null>(null);
-			const pathRef = useRef<SVGPathElement | null>(null);
+			const [statePathElement, setStatePathElement] =
+				useState<SVGPathElement | null>(null);
 			const [statePathLength, setStatePathLength] = useState<number>(
-				customProps.chartProps.customProps?.pathLength ?? 0
+				customProps.chartCustomProps.customProps?.pathLength ?? 0
 			);
 
 			useImperativeHandle(ref, () => {
@@ -31,20 +33,26 @@ const LineChart = React.memo(
 					lineChartBaseElement: lineChartBaseElementRef.current,
 					lineChartInternalComponentBaseElement:
 						lineChartInternalComponentBaseElementRef.current,
-					lineChartPathElement: pathRef.current,
+					lineChartPathElement: statePathElement,
 				};
 			});
 
 			useLayoutEffect(() => {
 				if (lineChartBaseElementRef.current) {
-					pathRef.current = lineChartBaseElementRef.current.querySelector(
-						".apexcharts-series path"
-					);
-					const pathLength =
-						pathRef.current?.getTotalLength() ?? statePathLength;
+					const pathElement: SVGPathElement | null =
+						lineChartBaseElementRef.current.querySelector(
+							".apexcharts-series path"
+						);
+					setStatePathElement(pathElement);
+				}
+			}, []);
+
+			useLayoutEffect(() => {
+				if (statePathElement) {
+					const pathLength = statePathElement.getTotalLength();
 					setStatePathLength(pathLength);
 				}
-			}, [statePathLength]);
+			}, [statePathElement]);
 
 			const theme = useTheme();
 
@@ -93,8 +101,8 @@ const LineChart = React.memo(
 				? theme.lineChartYAxisLabelColor
 				: "#fafafa";
 
-			const customChartProps = customProps.chartProps;
-			const defaultChartProps: LineChartProps["customProps"]["chartProps"] = {
+			const apexChartCustomProps = customProps.chartCustomProps;
+			const apexChartDefaultProps: ApexChartProps = {
 				type: "line",
 				options: {
 					theme: { mode: "dark" },
@@ -137,7 +145,7 @@ const LineChart = React.memo(
 					yaxis: {
 						// show: false,
 						title: {
-							text: "Traded Price",
+							// text: "Traded Price",
 							offsetX: -5,
 							style: {
 								color: chartYAxisTitleColor,
@@ -149,7 +157,7 @@ const LineChart = React.memo(
 						axisBorder: { show: true, color: chartYAxisBorderColor },
 						axisTicks: {
 							show: true,
-							offsetY: 1,
+							offsetY: 0,
 							color: chartYAxisTickColor,
 						},
 						labels: {
@@ -165,7 +173,7 @@ const LineChart = React.memo(
 					xaxis: {
 						title: {
 							text: "Time",
-							offsetY: -3,
+							offsetY: -20,
 							style: {
 								color: chartXAxisTitleColor,
 								fontFamily: chartFontFamily,
@@ -228,12 +236,10 @@ const LineChart = React.memo(
 				},
 			};
 
-			const chartProps = merge<
-				LineChartProps["customProps"]["chartProps"],
-				LineChartProps["customProps"]["chartProps"]
-			>(defaultChartProps, customChartProps);
+			const apexChartProps = merge(apexChartDefaultProps, apexChartCustomProps);
 
-			chartProps.customProps = {
+			apexChartProps.customProps = {
+				...apexChartProps.customProps,
 				pathLength: statePathLength,
 			};
 
@@ -243,7 +249,7 @@ const LineChart = React.memo(
 				<Styles.LineChart ref={lineChartBaseElementRef} {...otherProps}>
 					<Styles.ApexChart
 						ref={lineChartInternalComponentBaseElementRef}
-						{...chartProps}
+						{...apexChartProps}
 					/>
 				</Styles.LineChart>
 			);

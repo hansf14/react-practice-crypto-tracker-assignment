@@ -65,6 +65,60 @@ export const POPULAR_COIN_IDS = [
 	"theta-token", // Theta
 	"maker", // Maker
 ] as const;
+
+////////////////////////////////////////////////////////////
+// * marketdata
+// Market Data
+
+// [1] Market Capitalization
+// - market_cap: The market capitalization of the coin.
+// - market_cap_rank: The rank of the coin based on market capitalization.
+// - fully_diluted_valuation: The fully diluted valuation of the coin, which considers the total supply of coins.
+
+// [2] Volume and Supply Information:
+// - total_volume: The total trading volume of the coin.
+// - total_supply: The total supply of the coin.
+// - max_supply: The maximum supply of the coin.
+// - circulating_supply: The circulating supply of the coin.
+
+// [3] Price Information:
+// - current_price: The current price of the coin.
+// - ath: The all-time high (ATH) price of the coin.
+// - ath_date: The date when the all-time high price was reached.
+// - atl: The all-time low (ATL) price of the coin.
+// - atl_date: The date when the all-time low price was reached.
+// - high_24h: The highest price of the coin in the last 24 hours.
+// - low_24h: The lowest price of the coin in the last 24 hours.
+
+// [4] Price Change and Percentage Change:
+// - ath_change_percentage: The percentage change from the all-time high price
+// - atl_change_percentage: The percentage change from the all-time low price.
+
+// - price_change: The price change.
+//   ...
+// - price_change_percentage: The percentage price change.
+//   ...
+
+// - market_cap_change: The market capitalization change.
+//   ...
+// - market_cap_change_percentage: The market capitalization percentage change.
+//   ...
+
+////////////////////////////////////////////////////////////
+// * tickers
+// Tickers
+// [1] Price Information:
+// - converted_last: The last traded price of the cryptocurrency.
+// - bid_ask_spread_percentage: The percentage difference between the highest bid price and the lowest ask price.
+// - last_traded_at: The timestamp indicating when the cryptocurrency was last traded.
+// - timestamp: The timestamp indicating when the ticker data was last updated.
+
+// [2] Volume Information:
+// - converted_volume: The trading volume of the cryptocurrency
+// - timestamp: The timestamp indicating when the ticker data was last updated.
+
+////////////////////////////////////////////////////////////
+
 export interface ICoinMinimalInfo {
 	id: string;
 	name: string;
@@ -390,8 +444,8 @@ export interface FetchApiParams {
 }
 
 export interface FetchApiReturnType {
-	"fetch-coins-info": ICoinMinimalInfo[];
-	"fetch-coin-info": ICoinInfo;
+	"fetch-coins-info": Promise<ICoinMinimalInfo[]>;
+	"fetch-coin-info": Promise<ICoinInfo>;
 }
 
 export interface FetchApiInfo {
@@ -465,13 +519,13 @@ export function getFetchApiInfo({
 	return null;
 }
 
-export function fetchInfo<T extends FetchApiName>({
+export async function fetchInfo<T extends FetchApiName>({
 	apiName,
 	apiParams,
 }: {
 	apiName: T;
 	apiParams: FetchApiParams[T];
-}): FetchApiReturnType[T];
+}): Promise<Awaited<FetchApiReturnType[T]>>;
 export async function fetchInfo({
 	apiName,
 	apiParams,
@@ -498,7 +552,8 @@ export async function fetchInfo({
 			throw new Error(response.status.toString());
 		}
 
-		const json: FetchApiReturnType[FetchApiName] = await response.json();
+		const json: Awaited<FetchApiReturnType[FetchApiName]> =
+			await response.json();
 		return json;
 	} catch (error) {
 		if (!fetchApiInfo) {
@@ -522,7 +577,8 @@ export async function fetchInfo({
 				throw new Error(response.status.toString());
 			}
 
-			const json: FetchApiReturnType[FetchApiName] = await response.json();
+			const json: Awaited<FetchApiReturnType[FetchApiName]> =
+				await response.json();
 			return json;
 		} catch (error) {
 			console.group("[Error - fetchInfo fallback]");

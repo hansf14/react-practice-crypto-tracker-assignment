@@ -25,6 +25,12 @@ const LineChart = styled(LineChartBase)`
 	margin-top: 15px;
 `;
 
+const UnknownLineChart = styled.div`
+	display: flex;
+	justify-content: center;
+	padding: 15px;
+`;
+
 function getChartCompatibleTickers(data: ICoinInfo | RouteStateChart) {
 	data.tickers.sort(
 		(ticker1, ticker2) =>
@@ -55,7 +61,8 @@ function getChartCompatibleTickers(data: ICoinInfo | RouteStateChart) {
 
 function Chart() {
 	const { coinId } = useParams<RouteParamsChart>();
-	const { state } = useLocation<RouteStateChart>();
+	const { state } = useLocation<RouteStateChart>(); // state가 없으면 undefined
+	// console.log("state:", state);
 
 	const tickersRef = useRef<CompatibleTicker[]>([]);
 
@@ -73,10 +80,10 @@ function Chart() {
 				apiParams: { coinId },
 			});
 			tickersRef.current = getChartCompatibleTickers(data);
-			return data;
+			return tickersRef.current;
 		},
 		{
-			initialData: state ?? undefined,
+			// initialData: state ?? undefined,
 		}
 	);
 
@@ -85,31 +92,37 @@ function Chart() {
 	console.log("tickers:", tickersRef.current);
 
 	const lineChartCustomProps:
-		| LineChartProps["customProps"]["chartProps"]
-		| null = tickersRef.current
+		| LineChartProps["customProps"]["chartCustomProps"]
+		| null = data
 		? {
-				// options: {
-				// 	xaxis: {
-				// 		categories: tickers.map((ticker) => ticker.timestamp),
-				// 	},
-				// },
-				// series: [
-				// 	{
-				// 		name: "Price",
-				// 		data: tickers.map((ticker) => {
-				// 			const price = ticker.price;
-				// 			// console.log(price);
-				// 			return price;
-				// 		}),
-				// 	},
-				// ],
+				options: {
+					yaxis: {
+						title: {
+							text: "Traded Price",
+						},
+						min: (min) => {
+							console.log(min);
+							// return min < 0 ? 0 : min;
+							return min < 1 ? 0 : min;
+						},
+					},
+					xaxis: {
+						title: {
+							text: "Time",
+						},
+					},
+					// categories: data.map((ticker) => ticker.timestamp),
+				},
 				series: [
 					{
 						name: "Price",
-						data: tickersRef.current.map((ticker) => {
+						data: data.map((ticker) => {
+							const { price, timestamp } = ticker;
+							// console.log(price);
+
 							return {
-								x: ticker.timestamp,
-								y: ticker.price,
+								x: timestamp,
+								y: price,
 							};
 						}),
 					},
@@ -118,20 +131,18 @@ function Chart() {
 		: null;
 
 	return (
-		<>
-			<Section>
-				<SectionTitle>Traded Price Information</SectionTitle>
-				{isLoading ? (
-					<Loader>Loading...</Loader>
-				) : isError ? (
-					<ErrorDescription customProps={{ error }} />
-				) : lineChartCustomProps ? (
-					<LineChart customProps={{ chartProps: lineChartCustomProps }} />
-				) : (
-					"Unknown"
-				)}
-			</Section>
-		</>
+		<Section>
+			<SectionTitle>Price Chart Information</SectionTitle>
+			{isLoading ? (
+				<Loader>Loading...</Loader>
+			) : isError ? (
+				<ErrorDescription customProps={{ error }} />
+			) : lineChartCustomProps ? (
+				<LineChart customProps={{ chartCustomProps: lineChartCustomProps }} />
+			) : (
+				<UnknownLineChart>Unknown</UnknownLineChart>
+			)}
+		</Section>
 	);
 }
 

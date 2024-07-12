@@ -36,59 +36,6 @@ import { GlobalVar } from "@/settings/globalVar";
 import { RouteParamsCoin, RouteStateCoin } from "@/apis";
 import RouteOrRedirect from "@/components/RouteOrRedirect";
 
-////////////////////////////////////////////////////////////
-// * marketdata
-// Market Data
-
-// [1] Market Capitalization
-// - market_cap: The market capitalization of the coin.
-// - market_cap_rank: The rank of the coin based on market capitalization.
-// - fully_diluted_valuation: The fully diluted valuation of the coin, which considers the total supply of coins.
-
-// [2] Volume and Supply Information:
-// - total_volume: The total trading volume of the coin.
-// - total_supply: The total supply of the coin.
-// - max_supply: The maximum supply of the coin.
-// - circulating_supply: The circulating supply of the coin.
-
-// [3] Price Information:
-// - current_price: The current price of the coin.
-// - ath: The all-time high (ATH) price of the coin.
-// - ath_date: The date when the all-time high price was reached.
-// - atl: The all-time low (ATL) price of the coin.
-// - atl_date: The date when the all-time low price was reached.
-// - high_24h: The highest price of the coin in the last 24 hours.
-// - low_24h: The lowest price of the coin in the last 24 hours.
-
-// [4] Price Change and Percentage Change:
-// - ath_change_percentage: The percentage change from the all-time high price
-// - atl_change_percentage: The percentage change from the all-time low price.
-
-// - price_change: The price change.
-//   ...
-// - price_change_percentage: The percentage price change.
-//   ...
-
-// - market_cap_change: The market capitalization change.
-//   ...
-// - market_cap_change_percentage: The market capitalization percentage change.
-//   ...
-
-////////////////////////////////////////////////////////////
-// * tickers
-// Tickers
-// [1] Price Information:
-// - converted_last: The last traded price of the cryptocurrency.
-// - bid_ask_spread_percentage: The percentage difference between the highest bid price and the lowest ask price.
-// - last_traded_at: The timestamp indicating when the cryptocurrency was last traded.
-// - timestamp: The timestamp indicating when the ticker data was last updated.
-
-// [2] Volume Information:
-// - converted_volume: The trading volume of the cryptocurrency
-// - timestamp: The timestamp indicating when the ticker data was last updated.
-
-////////////////////////////////////////////////////////////
-
 const Header = styled(HeaderBase)`
 	gap: 10px;
 `;
@@ -200,7 +147,7 @@ function Coin() {
 		["fetch-coin-info", coinId],
 		() => fetchInfo({ apiName: "fetch-coin-info", apiParams: { coinId } })
 	);
-	console.log(data);
+	// console.log(data);
 
 	const isPriceMatch = useRouteMatch("/:coinId/price") ? true : false;
 	const isChartMatch = useRouteMatch("/:coinId/chart") ? true : false;

@@ -13,7 +13,7 @@ export interface TabsProps extends TabsFoundationProps {}
 
 /////////////////////////////////////////////////////////////
 
-export const TabBaseElementTypeValue = "span";
+export const TabBaseElementTypeValue = "div";
 export type TabBaseElementType = typeof TabBaseElementTypeValue;
 export type TabBaseElement = React.ElementRef<TabBaseElementType>;
 export type TabRefElement = TabBaseElement;

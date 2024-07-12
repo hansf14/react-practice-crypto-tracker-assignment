@@ -1,5 +1,5 @@
 import { Redirect, Route, useRouteMatch } from "react-router-dom";
-import { RouteOrRedirectProps } from "./types.";
+import { RouteOrRedirectProps } from "./types";
 import { RouteParamsType } from "@/apis";
 
 const RouteOrRedirect = <P extends RouteParamsType = {}>({
@@ -12,8 +12,8 @@ const RouteOrRedirect = <P extends RouteParamsType = {}>({
 	const shouldBeExact = exact ?? false;
 	const redirectTo = customProps?.redirectTo ?? "/error-404";
 	const redirectWhenNotMatch = customProps?.redirectWhenNotMatch ?? false;
-	const { constraintParams, constraintParamsExamineFn } =
-		customProps?.paramsConstraint ?? {};
+	const { paramsConstraint, paramsConstraintExamineFn } =
+		customProps?.paramsConstraintCondition ?? {};
 
 	const matchObj = useRouteMatch<P>(!path ? "*" : (path as string | string[]));
 	let isMatch = !matchObj
@@ -22,8 +22,11 @@ const RouteOrRedirect = <P extends RouteParamsType = {}>({
 		? false
 		: true;
 	isMatch =
-		matchObj && constraintParams && constraintParamsExamineFn
-			? constraintParamsExamineFn({ constraintParams, params: matchObj.params })
+		matchObj && paramsConstraint && paramsConstraintExamineFn
+			? paramsConstraintExamineFn({
+					paramsConstraint: paramsConstraint,
+					params: matchObj.params,
+			  })
 			: isMatch;
 
 	// console.log("shouldBeExact:", shouldBeExact);

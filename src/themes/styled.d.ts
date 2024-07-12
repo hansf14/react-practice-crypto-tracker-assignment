@@ -4,6 +4,7 @@ declare module "styled-components" {
 	export interface DefaultTheme {
 		bodyTextColor: string;
 		bodyBackgroundColor: string;
+		bodyFontFamily: string;
 		navBarHeight: string;
 		navBarTextColor: string;
 		navBarHoverTextColor: string;
@@ -24,5 +25,19 @@ declare module "styled-components" {
 		nestedListDecoratorColor: string;
 		tabBackgroundColor: string;
 		tabActiveBackgroundColor: string;
+		tabHoverTextColor: string;
+		lineChartFontFamily: string;
+		lineChartBackgroundColor: string;
+		lineChartGradientColorFrom: string;
+		lineChartGradientColorTo: string;
+		lineChartGridBorderColor: string;
+		lineChartXAxisTitleColor: string;
+		lineChartXAxisTickColor: string;
+		lineChartXAxisBorderColor: string;
+		lineChartXAxisLabelColor: string;
+		lineChartYAxisTickColor: string;
+		lineChartYAxisTickColor: string;
+		lineChartYAxisBorderColor: string;
+		lineChartYAxisLabelColor: string;
 	}
 }

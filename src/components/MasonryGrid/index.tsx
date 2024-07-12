@@ -441,8 +441,8 @@ const MasonryGrid = React.memo(
 				const maxHeightColIdx = columnHeights.findIndex(
 					(height) => height === maxHeight
 				);
-				console.log("columnHeights:", columnHeights);
-				console.log("maxHeightColIdx:", maxHeightColIdx);
+				// console.log("columnHeights:", columnHeights);
+				// console.log("maxHeightColIdx:", maxHeightColIdx);
 
 				for (
 					let separatorIdx = 0;
@@ -467,7 +467,7 @@ const MasonryGrid = React.memo(
 							? true
 							: false;
 
-					console.log(arrIsSeparatorNeededRef.current);
+					// console.log(arrIsSeparatorNeededRef.current);
 
 					if (arrIsSeparatorNeededRef.current[separatorIdx]) {
 						const separatorHeight =

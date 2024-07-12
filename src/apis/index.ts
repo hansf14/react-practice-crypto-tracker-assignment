@@ -1,5 +1,3 @@
-import { ConstraintParamsExamineFnType } from "@/components/RouteOrRedirect/types.";
-
 export const BASE_URL = "https://api.coingecko.com/api/v3/coins" as const;
 export const LOCAL_BASE_URL = process.env.PUBLIC_URL;
 
@@ -352,32 +350,162 @@ export interface RouteStatePrice extends ICoinInfo {}
 
 export interface RouteParamsChart extends RouteParamsCoin {}
 
-export interface RouteParamsChart extends ICoinInfo {}
+export interface RouteStateChart extends ICoinInfo {}
 
-export const ConstraintParamsCoin = {
-	coinId: POPULAR_COIN_IDS,
-} as const;
+////////////////////////////////////////////////////////////
 
-export const constraintParamsExamineFnCoin: ConstraintParamsExamineFnType<
-	RouteParamsCoin
-> = ({ constraintParams, params }) => {
-	return constraintParams.coinId.includes(params.coinId);
+export const FetchApiNamesArr = [
+	"fetch-coins-info",
+	"fetch-coin-info",
+] as const;
+
+export type FetchApiName = (typeof FetchApiNamesArr)[number];
+
+export type FetchApiNames = {
+	[N in FetchApiName]: N;
 };
 
-export async function fetchCoinsInfo() {
+// export const FetchApiNamesObj = FetchApiNamesArr.reduce((acc, name) => {
+// 	acc[name] = name;
+// 	return acc;
+// }, {} as { [key: string]: string }) as FetchApiNames;
+
+// export type FetchApiParams<T extends FetchApiName> =
+// 	T extends FetchApiNames["fetch-coins-info"]
+// 		? null
+// 		: T extends FetchApiNames["fetch-coin-info"]
+// 		? { coinId: string }
+// 		: never;
+
+// export type FetchApiReturnType<T extends FetchApiName> =
+// 	T extends FetchApiNames["fetch-coins-info"]
+// 		? Promise<ICoinMinimalInfo[]>
+// 		: T extends FetchApiNames["fetch-coin-info"]
+// 		? Promise<ICoinInfo>
+// 		: never;
+
+export interface FetchApiParams {
+	"fetch-coins-info": null;
+	"fetch-coin-info": { coinId: string };
+}
+
+export interface FetchApiReturnType {
+	"fetch-coins-info": ICoinMinimalInfo[];
+	"fetch-coin-info": ICoinInfo;
+}
+
+export interface FetchApiInfo {
+	apiPrimary: {
+		function?: Function;
+		endpoint: string;
+	};
+	apiFallback: {
+		function?: Function;
+		endpoint: string;
+	};
+}
+
+// export type MatchedParamsType<T> = T extends ({apiName, apiParams}: {apiName: FetchApiName, apiParams: infer FetchApiParams[FetchApiName]}): void;
+
+export function getFetchApiInfo<T extends FetchApiName>({
+	apiName,
+	apiParams,
+}: {
+	apiName: T;
+	apiParams: FetchApiParams[T];
+}): FetchApiInfo | null;
+export function getFetchApiInfo({
+	apiName,
+	apiParams,
+}: {
+	apiName: FetchApiName;
+	apiParams: FetchApiParams[FetchApiName];
+}): FetchApiInfo | null {
+	let _apiName: FetchApiName = "fetch-coins-info";
+
+	if (apiName === _apiName) {
+		return {
+			apiPrimary: {
+				endpoint: `${BASE_URL}/list`,
+			},
+			apiFallback: {
+				endpoint: `${LOCAL_BASE_URL}/api/coins-list.json`,
+			},
+		};
+	}
+
+	_apiName = "fetch-coin-info";
+	if (apiName === _apiName) {
+		const _apiParams = apiParams as FetchApiParams[typeof _apiName];
+
+		return {
+			apiPrimary: {
+				endpoint: `${BASE_URL}/${_apiParams.coinId}`,
+			},
+			apiFallback: {
+				endpoint: `${LOCAL_BASE_URL}/api/coin/${_apiParams.coinId}.json`,
+			},
+		};
+	}
+
+	// _apiName = "fetch-coin-ohlc-info";
+	// if (apiName === _apiName) {
+	// 	const _apiParams = apiParams as FetchApiParams[typeof _apiName];
+
+	// 	return {
+	// 		apiPrimary: {
+	// 			endpoint: `${BASE_URL}/${_apiParams.coinId}/ohlc`,
+	// 		},
+	// 		apiFallback: {
+	// 			endpoint: `${LOCAL_BASE_URL}/api/coin-ohlc/${_apiParams.coinId}.json`,
+	// 		},
+	// 	};
+	// }
+
+	return null;
+}
+
+export function fetchInfo<T extends FetchApiName>({
+	apiName,
+	apiParams,
+}: {
+	apiName: T;
+	apiParams: FetchApiParams[T];
+}): FetchApiReturnType[T];
+export async function fetchInfo({
+	apiName,
+	apiParams,
+}: {
+	apiName: FetchApiName;
+	apiParams: FetchApiParams[FetchApiName];
+}) {
+	console.log("[fetchInfo]");
+
 	const options = {
 		method: "GET",
 		headers: { accept: "application/json" },
 	};
+	const fetchApiInfo = getFetchApiInfo({ apiName, apiParams });
+
 	try {
-		const response = await fetch(`${BASE_URL}/list`, options);
+		if (!fetchApiInfo) {
+			throw new Error("400");
+		}
+
+		const endpoint = fetchApiInfo.apiPrimary.endpoint;
+		const response = await fetch(endpoint, options);
 		if (!response.ok && response.status !== 304) {
 			throw new Error(response.status.toString());
 		}
-		const json: ICoinMinimalInfo[] = await response.json();
+
+		const json: FetchApiReturnType[FetchApiName] = await response.json();
 		return json;
 	} catch (error) {
-		console.group("[fetchCoinsInfo]");
+		if (!fetchApiInfo) {
+			throw new Error("400");
+		}
+
+		console.group("[Error - fetchInfo]");
 		if (error instanceof Error) {
 			console.log(`Error ${error.message}`);
 		} else {
@@ -386,90 +514,137 @@ export async function fetchCoinsInfo() {
 		console.log("Using a fallback method due to a fetch error...");
 		console.groupEnd();
 
-		return await fetchCoinsInfoDev(); // fallback
-	}
-}
+		try {
+			// fallback
+			const endpoint = fetchApiInfo.apiFallback.endpoint;
+			const response = await fetch(endpoint, options);
+			if (!response.ok && response.status !== 304) {
+				throw new Error(response.status.toString());
+			}
 
-export async function fetchCoinsInfoDev() {
-	const options = {
-		method: "GET",
-		headers: { accept: "application/json" },
-	};
-	try {
-		const response = await fetch(
-			`${LOCAL_BASE_URL}/api/coins-list.json`,
-			options
-		);
-		if (!response.ok && response.status !== 304) {
-			throw new Error(response.status.toString());
-		}
-		const json: ICoinMinimalInfo[] = await response.json();
-		return json;
-	} catch (error) {
-		console.group("[fetchCoinsInfoDev]");
-		if (error instanceof Error) {
-			console.log(`Error ${error.message}`);
-			console.groupEnd();
-			throw error;
-		} else {
-			console.log(`Error: ${error as string}`);
-			console.groupEnd();
-			throw new Error(error as string);
+			const json: FetchApiReturnType[FetchApiName] = await response.json();
+			return json;
+		} catch (error) {
+			console.group("[Error - fetchInfo fallback]");
+			if (error instanceof Error) {
+				console.log(`Error ${error.message}`);
+				console.groupEnd();
+				throw error;
+			} else {
+				console.log(`Error: ${error as string}`);
+				console.groupEnd();
+				throw new Error(error as string);
+			}
 		}
 	}
 }
 
-export async function fetchCoinInfo({ coinId }: { coinId: string }) {
-	const options = {
-		method: "GET",
-		headers: { accept: "application/json" },
-	};
-	try {
-		const response = await fetch(`${BASE_URL}/${coinId}`, options);
-		if (!response.ok && response.status !== 304) {
-			throw new Error(response.status.toString());
-		}
-		const json: ICoinInfo = await response.json();
-		return json;
-	} catch (error) {
-		console.group("[fetchCoinInfo]");
-		if (error instanceof Error) {
-			console.log(`Error ${error.message}`);
-		} else {
-			console.log(`Error: ${error as string}`);
-		}
-		console.log("Using a fallback method due to a fetch error...");
-		console.groupEnd();
+// export async function fetchCoinsInfo() {
+// 	const options = {
+// 		method: "GET",
+// 		headers: { accept: "application/json" },
+// 	};
+// 	try {
+// 		const response = await fetch(`${BASE_URL}/list`, options);
+// 		if (!response.ok && response.status !== 304) {
+// 			throw new Error(response.status.toString());
+// 		}
+// 		const json: ICoinMinimalInfo[] = await response.json();
+// 		return json;
+// 	} catch (error) {
+// 		console.group("[fetchCoinsInfo]");
+// 		if (error instanceof Error) {
+// 			console.log(`Error ${error.message}`);
+// 		} else {
+// 			console.log(`Error: ${error as string}`);
+// 		}
+// 		console.log("Using a fallback method due to a fetch error...");
+// 		console.groupEnd();
 
-		return await fetchCoinInfoDev({ coinId }); // fallback
-	}
-}
+// 		return await fetchCoinsInfoDev(); // fallback
+// 	}
+// }
 
-export async function fetchCoinInfoDev({ coinId }: { coinId: string }) {
-	const options = {
-		method: "GET",
-		headers: { accept: "application/json" },
-	};
-	try {
-		const response = await fetch(
-			`${LOCAL_BASE_URL}/api/coin/${coinId}.json`,
-			options
-		);
-		if (!response.ok && response.status !== 304) {
-			throw new Error(response.status.toString());
-		}
-		const json: ICoinInfo = await response.json();
-		return json;
-	} catch (error) {
-		console.group("[fetchCoinInfoDev]");
-		if (error instanceof Error) {
-			console.log(`Error ${error.message}`);
-			console.groupEnd();
-			throw error;
-		} else {
-			console.log(`Error: ${error as string}`);
-			console.groupEnd();
-			throw new Error(error as string);
-		}
-	}
-}
+// export async function fetchCoinsInfoDev() {
+// 	const options = {
+// 		method: "GET",
+// 		headers: { accept: "application/json" },
+// 	};
+// 	try {
+// 		const response = await fetch(
+// 			`${LOCAL_BASE_URL}/api/coins-list.json`,
+// 			options
+// 		);
+// 		if (!response.ok && response.status !== 304) {
+// 			throw new Error(response.status.toString());
+// 		}
+// 		const json: ICoinMinimalInfo[] = await response.json();
+// 		return json;
+// 	} catch (error) {
+// 		console.group("[fetchCoinsInfoDev]");
+// 		if (error instanceof Error) {
+// 			console.log(`Error ${error.message}`);
+// 			console.groupEnd();
+// 			throw error;
+// 		} else {
+// 			console.log(`Error: ${error as string}`);
+// 			console.groupEnd();
+// 			throw new Error(error as string);
+// 		}
+// 	}
+// }
+
+// export async function fetchCoinInfo({ coinId }: { coinId: string }) {
+// 	const options = {
+// 		method: "GET",
+// 		headers: { accept: "application/json" },
+// 	};
+// 	try {
+// 		const response = await fetch(`${BASE_URL}/${coinId}`, options);
+// 		if (!response.ok && response.status !== 304) {
+// 			throw new Error(response.status.toString());
+// 		}
+// 		const json: ICoinInfo = await response.json();
+// 		return json;
+// 	} catch (error) {
+// 		console.group("[fetchCoinInfo]");
+// 		if (error instanceof Error) {
+// 			console.log(`Error ${error.message}`);
+// 		} else {
+// 			console.log(`Error: ${error as string}`);
+// 		}
+// 		console.log("Using a fallback method due to a fetch error...");
+// 		console.groupEnd();
+
+// 		return await fetchCoinInfoDev({ coinId }); // fallback
+// 	}
+// }
+
+// export async function fetchCoinInfoDev({ coinId }: { coinId: string }) {
+// 	const options = {
+// 		method: "GET",
+// 		headers: { accept: "application/json" },
+// 	};
+// 	try {
+// 		const response = await fetch(
+// 			`${LOCAL_BASE_URL}/api/coin/${coinId}.json`,
+// 			options
+// 		);
+// 		if (!response.ok && response.status !== 304) {
+// 			throw new Error(response.status.toString());
+// 		}
+// 		const json: ICoinInfo = await response.json();
+// 		return json;
+// 	} catch (error) {
+// 		console.group("[fetchCoinInfoDev]");
+// 		if (error instanceof Error) {
+// 			console.log(`Error ${error.message}`);
+// 			console.groupEnd();
+// 			throw error;
+// 		} else {
+// 			console.log(`Error: ${error as string}`);
+// 			console.groupEnd();
+// 			throw new Error(error as string);
+// 		}
+// 	}
+// }

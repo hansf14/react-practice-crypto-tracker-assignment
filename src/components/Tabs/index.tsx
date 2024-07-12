@@ -15,7 +15,12 @@ export const Tabs = styled(TabsBaseElementTypeValue)`
 export const Tab = styled(TabBaseElementTypeValue).withConfig({
 	shouldForwardProp: (prop) => !["customProps"].includes(prop),
 })<TabProps>`
-	padding: 7px 0px;
+	display: flex;
+	flex-direction: column;
+	justify-content: stretch;
+	align-items: stretch;
+
+	cursor: pointer;
 
 	background-color: ${({ customProps, theme }) =>
 		typeof customProps?.isActive === "boolean"
@@ -26,11 +31,16 @@ export const Tab = styled(TabBaseElementTypeValue).withConfig({
 
 	text-align: center;
 	text-transform: uppercase;
-	font-size: 13px;
+	font-size: 14px;
 	font-weight: bold;
 
-	a {
-		display: block;
+	:is(a, button) {
+		padding: 10px;
+
+		&:hover {
+			color: ${({ theme }) =>
+				theme.tabHoverTextColor ? theme.tabHoverTextColor : "#000"};
+		}
 	}
 `;
 

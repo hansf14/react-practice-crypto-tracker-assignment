@@ -2,7 +2,7 @@ import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Helmet } from "react-helmet-async";
-import { POPULAR_COIN_IDS, fetchCoinsInfo } from "@/apis";
+import { fetchInfo, POPULAR_COIN_IDS } from "@/apis";
 import Header from "@/components/Header";
 import Container from "@/components/Container";
 import MainTitle from "@/components/MainTitle";
@@ -36,7 +36,7 @@ const Coin = styled.li`
 	font-weight: bold;
 	transition: color 0.1s ease-in-out, background-color 0.3s ease-in-out;
 
-	a {
+	:where(a) {
 		display: flex;
 		align-items: center;
 		padding: 20px;
@@ -44,9 +44,9 @@ const Coin = styled.li`
 	}
 
 	&:hover {
-		a {
+		:where(a) {
 			color: ${({ theme }) =>
-				theme.listBoxHoverTextColor ? theme.listBoxHoverTextColor : "#333"};
+				theme.listBoxHoverTextColor ? theme.listBoxHoverTextColor : "#000"};
 		}
 	}
 `;
@@ -58,12 +58,9 @@ const Img = styled.img`
 `;
 
 function Coins() {
-	const { isLoading, data, isError, error } = useQuery<
-		Awaited<ReturnType<typeof fetchCoinsInfo>>
-	>(
-		["coins-list"],
-		fetchCoinsInfo,
-		// fetchCoinsInfoDev,
+	const { isLoading, data, isError, error } = useQuery(
+		["fetch-coins-list"],
+		() => fetchInfo({ apiName: "fetch-coins-info", apiParams: null }),
 		{
 			// select: (data) => data.slice(0, 30),
 			select: (data) => {
@@ -72,8 +69,6 @@ function Coins() {
 					([...POPULAR_COIN_IDS] as string[]).includes(coin.id)
 				);
 			},
-			staleTime: 3600 * 1000,
-			cacheTime: 3600 * 1000,
 		}
 	);
 	// console.log("isLoading:", isLoading);

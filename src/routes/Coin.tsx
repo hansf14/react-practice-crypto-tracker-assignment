@@ -10,7 +10,7 @@ import styled, { css } from "styled-components";
 import Price from "./Price";
 import Chart from "./Chart";
 import { useQuery } from "react-query";
-import { fetchCoinInfo, fetchCoinInfoDev } from "@/apis";
+import { fetchInfo } from "@/apis";
 import { Helmet } from "react-helmet-async";
 import { default as ContainerBase } from "@/components/Container";
 import { default as HeaderBase } from "@/components/Header";
@@ -35,19 +35,6 @@ import Section, { SectionTitle } from "@/components/Section";
 import { GlobalVar } from "@/settings/globalVar";
 import { RouteParamsCoin, RouteStateCoin } from "@/apis";
 import RouteOrRedirect from "@/components/RouteOrRedirect";
-
-////////////////////////////////////////////////////////////
-// * tickers
-// Tickers
-// [1] Price Information:
-// - converted_last: The last traded price of the cryptocurrency.
-// - bid_ask_spread_percentage: The percentage difference between the highest bid price and the lowest ask price.
-// - last_traded_at: The timestamp indicating when the cryptocurrency was last traded.
-// - timestamp: The timestamp indicating when the ticker data was last updated.
-
-// [2] Volume Information:
-// - converted_volume: The trading volume of the cryptocurrency
-// - timestamp: The timestamp indicating when the ticker data was last updated.
 
 ////////////////////////////////////////////////////////////
 // * marketdata
@@ -88,6 +75,19 @@ import RouteOrRedirect from "@/components/RouteOrRedirect";
 //   ...
 
 ////////////////////////////////////////////////////////////
+// * tickers
+// Tickers
+// [1] Price Information:
+// - converted_last: The last traded price of the cryptocurrency.
+// - bid_ask_spread_percentage: The percentage difference between the highest bid price and the lowest ask price.
+// - last_traded_at: The timestamp indicating when the cryptocurrency was last traded.
+// - timestamp: The timestamp indicating when the ticker data was last updated.
+
+// [2] Volume Information:
+// - converted_volume: The trading volume of the cryptocurrency
+// - timestamp: The timestamp indicating when the ticker data was last updated.
+
+////////////////////////////////////////////////////////////
 
 const Header = styled(HeaderBase)`
 	gap: 10px;
@@ -98,11 +98,11 @@ const Header = styled(HeaderBase)`
 const Container = styled(ContainerBase)`
 	word-break: break-word;
 
-	& a {
+	:where(a) {
 		transition: color 0.2s ease-in-out;
 		&:hover {
 			color: ${({ theme }) =>
-				theme.linkHoverTextColor ? theme.linkHoverTextColor : "#333"};
+				theme.linkHoverTextColor ? theme.linkHoverTextColor : "#000"};
 		}
 	}
 
@@ -196,17 +196,9 @@ function Coin() {
 	const { state } = useLocation<RouteStateCoin>();
 	// console.log(state.coinName);
 
-	const { isLoading, data, isError, error } = useQuery<
-		Awaited<ReturnType<typeof fetchCoinInfo>>
-	>(
-		["info", coinId],
-		() =>
-			// fetchCoinInfo({ coinId }),
-			fetchCoinInfoDev({ coinId }),
-		{
-			staleTime: 3600 * 1000,
-			cacheTime: 3600 * 1000,
-		}
+	const { isLoading, data, isError, error } = useQuery(
+		["fetch-coin-info", coinId],
+		() => fetchInfo({ apiName: "fetch-coin-info", apiParams: { coinId } })
 	);
 	console.log(data);
 
@@ -915,9 +907,7 @@ function Coin() {
 							<Link
 								to={{
 									pathname: `/${coinId}/price`,
-									state: {
-										data,
-									},
+									state: data,
 								}}
 							>
 								Price
@@ -927,9 +917,7 @@ function Coin() {
 							<Link
 								to={{
 									pathname: `/${coinId}/chart`,
-									state: {
-										data,
-									},
+									state: data,
 								}}
 							>
 								Chart
@@ -947,7 +935,7 @@ function Coin() {
 							path={`/:coinId/chart`}
 							customProps={{ redirectWhenNotMatch: true }}
 						>
-							<Chart coinId={coinId} />
+							<Chart />
 						</RouteOrRedirect>
 					</Switch>
 				</>

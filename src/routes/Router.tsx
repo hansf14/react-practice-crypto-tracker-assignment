@@ -3,13 +3,13 @@ import Coin from "@/routes/Coin";
 import Coins from "@/routes/Coins";
 import NavBar from "@/components/NavBar";
 import RouteOrRedirect from "@/components/RouteOrRedirect";
-import {
-	ConstraintParamsCoin,
-	RouteParamsCoin,
-	constraintParamsExamineFnCoin,
-} from "@/apis";
+import { RouteParamsCoin } from "@/apis";
 import { RemoveReadonlyDeep } from "@/utils/typeUtils";
 import NotFound from "./NotFound";
+import {
+	CoinParamsConstraint,
+	coinParamsConstraintExamineFn,
+} from "@/components/RouteOrRedirect/types";
 
 function Router() {
 	return (
@@ -26,11 +26,12 @@ function Router() {
 					path="/:coinId"
 					customProps={{
 						redirectWhenNotMatch: true,
-						paramsConstraint: {
-							constraintParams: ConstraintParamsCoin as RemoveReadonlyDeep<
-								typeof ConstraintParamsCoin
+						paramsConstraintCondition: {
+							// paramsConstraint: CoinParamsConstraint,
+							paramsConstraint: CoinParamsConstraint as RemoveReadonlyDeep<
+								typeof CoinParamsConstraint
 							>,
-							constraintParamsExamineFn: constraintParamsExamineFnCoin,
+							paramsConstraintExamineFn: coinParamsConstraintExamineFn,
 						},
 					}}
 				>

@@ -1,144 +1,137 @@
-// import { useParams } from "react-router-dom";
-
 import { useQuery } from "react-query";
-import { fetchCoinInfo } from "@/apis";
-import ApexChart from "react-apexcharts";
+import {
+	ICoinInfo,
+	RouteParamsChart,
+	RouteStateChart,
+	fetchInfo,
+} from "@/apis";
+import { useLocation, useParams } from "react-router-dom";
+import Section, { SectionTitle } from "@/components/Section";
+import Loader from "@/components/Loader";
+import ErrorDescription from "@/components/ErrorDescription";
+import { dateStringToEpochTime, formatDate } from "@/utils/formatDate";
+import useLikeConstructor from "@/hooks/useLikeConstructor";
+import { default as LineChartBase } from "@/components/LineChart";
+import { LineChartProps } from "@/components/LineChart/types";
+import styled from "styled-components";
+import { useRef } from "react";
 
-interface IHistoricalData {
-	time_open: string;
-	time_close: string;
-	open: number;
-	high: number;
-	low: number;
-	close: number;
-	volume: number;
-	market_cap: number;
+interface CompatibleTicker {
+	timestamp: number;
+	price: number;
 }
 
-interface ChartProps {
-	coinId: string;
+const LineChart = styled(LineChartBase)`
+	margin-top: 15px;
+`;
+
+function getChartCompatibleTickers(data: ICoinInfo | RouteStateChart) {
+	data.tickers.sort(
+		(ticker1, ticker2) =>
+			dateStringToEpochTime(ticker1.timestamp) -
+			dateStringToEpochTime(ticker2.timestamp)
+	);
+
+	const formattedTimestamps: string[] = [];
+	const sampledTickers: CompatibleTicker[] = [];
+	for (let i = 0, j = 0; i < data.tickers.length; i++) {
+		const epochTime = dateStringToEpochTime(data.tickers[i].timestamp);
+		const { formattedTime } = formatDate(epochTime);
+		const hms = formattedTime.split(":");
+		const formattedHourAndMinute = `${hms[0]}:${hms[1]}`;
+
+		if (j === 0 || formattedTimestamps[j - 1] !== formattedHourAndMinute) {
+			formattedTimestamps[j] = formattedHourAndMinute;
+			sampledTickers[j] = {
+				timestamp: epochTime,
+				price: parseFloat(data.tickers[i].converted_last.usd.toFixed(2)),
+			};
+			j++;
+		}
+	}
+
+	return sampledTickers;
 }
 
-function Chart({ coinId }: ChartProps) {
-	// const params = useParams();
-	// const { isLoading, data } = useQuery<IHistoricalData[] | { error: string }>(
-	// 	["ohlcv", coinId],
-	// 	() => fetchCoinInfo(coinId),
-	// 	// {
-	// 	// 	refetchInterval: 10000,
-	// 	// }
-	// );
+function Chart() {
+	const { coinId } = useParams<RouteParamsChart>();
+	const { state } = useLocation<RouteStateChart>();
+
+	const tickersRef = useRef<CompatibleTicker[]>([]);
+
+	useLikeConstructor(() => {
+		if (state) {
+			tickersRef.current = getChartCompatibleTickers(state);
+		}
+	});
+
+	const { isLoading, data, isError, error } = useQuery(
+		["chart", coinId],
+		async () => {
+			const data = await fetchInfo({
+				apiName: "fetch-coin-info",
+				apiParams: { coinId },
+			});
+			tickersRef.current = getChartCompatibleTickers(data);
+			return data;
+		},
+		{
+			initialData: state ?? undefined,
+		}
+	);
+
+	// console.log("state:", state);
+	// console.log(data);
+	console.log("tickers:", tickersRef.current);
+
+	const lineChartCustomProps:
+		| LineChartProps["customProps"]["chartProps"]
+		| null = tickersRef.current
+		? {
+				// options: {
+				// 	xaxis: {
+				// 		categories: tickers.map((ticker) => ticker.timestamp),
+				// 	},
+				// },
+				// series: [
+				// 	{
+				// 		name: "Price",
+				// 		data: tickers.map((ticker) => {
+				// 			const price = ticker.price;
+				// 			// console.log(price);
+				// 			return price;
+				// 		}),
+				// 	},
+				// ],
+				series: [
+					{
+						name: "Price",
+						data: tickersRef.current.map((ticker) => {
+							return {
+								x: ticker.timestamp,
+								y: ticker.price,
+							};
+						}),
+					},
+				],
+		  }
+		: null;
 
 	return (
-		<div>
-			{/* {isLoading ? (
-				"Loading chart..."
-			) : (data as { error: string }).error ? (
-				(data as { error: string }).error
-			) : (
-				<ApexChart
-					type="line"
-					options={{
-						theme: { mode: "dark" },
-						chart: {
-							width: 500,
-							height: 300,
-							toolbar: { show: false },
-							background: "transparent",
-						},
-						grid: { show: false },
-						stroke: {
-							curve: "smooth",
-							width: 5,
-						},
-						yaxis: { show: false },
-						xaxis: {
-							labels: { show: false },
-							axisBorder: { show: false },
-							axisTicks: {
-								show: false,
-							},
-							type: "datetime",
-							categories: (data as IHistoricalData[])?.map((price) => {
-								// const date = new Date(parseInt(price.time_close) * 1000)
-								// 	.toISOString()
-								// 	.split("T")[0];
-								//
-								// return date;
-								// 2024-04-13
-
-								const date = new Date(parseInt(price.time_close) * 1000);
-								const year = date.getFullYear();
-								const monthIndex = date.getMonth();
-								const day = date.getDate();
-
-								const months = [
-									"Jan",
-									"Feb",
-									"Mar",
-									"Apr",
-									"May",
-									"Jun",
-									"Jul",
-									"Aug",
-									"Sep",
-									"Oct",
-									"Nov",
-									"Dec",
-								];
-
-								const formattedDate = `${year}/${months[monthIndex]}/${
-									day < 10 ? "0" + day : day
-								}`;
-
-								return formattedDate;
-							}),
-						},
-						fill: {
-							type: "gradient",
-							gradient: {
-								// gradientToColors: ["blue"],
-								gradientToColors: ["#0be881"],
-								stops: [0, 100],
-							},
-						},
-						// colors: ["red"],
-						colors: ["#0fbcf9"],
-						tooltip: {
-							y: {
-								formatter: (value) => `$${value.toFixed(2)}`,
-							},
-						},
-					}}
-					series={[
-						{
-							name: "Price",
-							data:
-								(data as IHistoricalData[])?.map((price) => price.close) ?? [],
-						},
-					]}
-				/>
-			)
-
-			// <ApexChart
-			// 	type="line"
-			// 	options={{
-			// 		theme: { mode: "dark" },
-			// 		chart: { width: 500, height: 500 },
-			// 	}}
-			// 	series={[
-			// 		{
-			// 			name: "hello",
-			// 			data: [1, 2, 3, 4, 5, 6],
-			// 		},
-			// 		{
-			// 			name: "sales",
-			// 			data: [15, 18, 15, 78, 56],
-			// 		},
-			// 	]}
-			// />
-			} */}
-		</div>
+		<>
+			<Section>
+				<SectionTitle>Traded Price Information</SectionTitle>
+				{isLoading ? (
+					<Loader>Loading...</Loader>
+				) : isError ? (
+					<ErrorDescription customProps={{ error }} />
+				) : lineChartCustomProps ? (
+					<LineChart customProps={{ chartProps: lineChartCustomProps }} />
+				) : (
+					"Unknown"
+				)}
+			</Section>
+		</>
 	);
 }
 

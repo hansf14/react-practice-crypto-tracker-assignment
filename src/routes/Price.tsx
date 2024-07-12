@@ -1,11 +1,6 @@
 import { useQuery } from "react-query";
 import { useLocation, useParams } from "react-router-dom";
-import {
-	RouteParamsPrice,
-	RouteStatePrice,
-	fetchCoinInfo,
-	fetchCoinInfoDev,
-} from "@/apis";
+import { fetchInfo, RouteParamsPrice, RouteStatePrice } from "@/apis";
 import ListGrid, { ListGridItem } from "@/components/ListGrid";
 import Section, { SectionTitle } from "@/components/Section";
 import { dateStringToEpochTime, formatDate } from "@/utils/formatDate";
@@ -18,17 +13,11 @@ function Price() {
 	const { coinId } = useParams<RouteParamsPrice>();
 	const { state } = useLocation<RouteStatePrice>();
 
-	const { isLoading, data, isError, error } = useQuery<
-		Awaited<ReturnType<typeof fetchCoinInfo>>
-	>(
-		["info", coinId],
-		() => {
-			// return state ? state : fetchCoinInfo({ coinId });
-			return state ? state : fetchCoinInfoDev({ coinId });
-		},
+	const { isLoading, data, isError, error } = useQuery(
+		["fetch-coin-info", coinId],
+		() => fetchInfo({ apiName: "fetch-coin-info", apiParams: { coinId } }),
 		{
-			staleTime: 3600 * 1000,
-			cacheTime: 3600 * 1000,
+			initialData: state ?? undefined,
 		}
 	);
 	// console.log(data);

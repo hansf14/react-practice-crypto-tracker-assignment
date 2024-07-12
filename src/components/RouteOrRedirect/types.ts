@@ -1,5 +1,15 @@
-import { RouteParamsType } from "@/apis";
+import { POPULAR_COIN_IDS, RouteParamsCoin, RouteParamsType } from "@/apis";
 import { RedirectProps, RouteProps } from "react-router-dom";
+
+export const CoinParamsConstraint = {
+	coinId: POPULAR_COIN_IDS,
+} as const;
+
+export const coinParamsConstraintExamineFn: ParamsConstraintExamineFnType<
+	RouteParamsCoin
+> = ({ paramsConstraint, params }) => {
+	return paramsConstraint.coinId.includes(params.coinId);
+};
 
 export type RouteOrRedirectFoundationProps = RouteProps;
 
@@ -7,7 +17,7 @@ export type RouteOrRedirectFoundationProps = RouteProps;
 // 	[K in string]: string[];
 // };
 
-export type ConstraintParamsType<P extends RouteParamsType = {}> = {
+export type ParamsConstraintType<P extends RouteParamsType = {}> = {
 	[K in keyof P]: string[];
 };
 
@@ -18,19 +28,19 @@ export type ConstraintParamsType<P extends RouteParamsType = {}> = {
 // 	params: RouteParamsType;
 // }) => boolean;
 
-export type ConstraintParamsExamineFnType<P extends RouteParamsType = {}> = ({
-	constraintParams,
+export type ParamsConstraintExamineFnType<P extends RouteParamsType = {}> = ({
+	paramsConstraint,
 }: {
-	constraintParams: ConstraintParamsType<P>;
+	paramsConstraint: ParamsConstraintType<P>;
 	params: P;
 }) => boolean;
 
 export interface RouteOrRedirectCustomProps<P extends RouteParamsType = {}> {
 	redirectTo?: RedirectProps["to"];
 	redirectWhenNotMatch?: boolean;
-	paramsConstraint?: {
-		constraintParams: ConstraintParamsType<P>;
-		constraintParamsExamineFn: ConstraintParamsExamineFnType<P>;
+	paramsConstraintCondition?: {
+		paramsConstraint: ParamsConstraintType<P>;
+		paramsConstraintExamineFn: ParamsConstraintExamineFnType<P>;
 	};
 }
 

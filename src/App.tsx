@@ -68,7 +68,8 @@ const GlobalStyle = createGlobalStyle`
 
     color: ${({ theme }) =>
 			theme.bodyTextColor ? theme.bodyTextColor : "#000"};
-    font-family: "Source Sans 3", sans-serif;
+    font-family: ${({ theme }) =>
+			theme.bodyFontFamily ? theme.bodyFontFamily : `sans-serif`};
     font-optical-sizing: auto;
     font-weight: 500;
     font-style: normal;

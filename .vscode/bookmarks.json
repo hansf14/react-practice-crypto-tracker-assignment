@@ -1,0 +1,29 @@
+{
+	"files": [
+		{
+			"path": "src/themes/styled.d.ts",
+			"bookmarks": [
+				{
+					"line": 27,
+					"column": 2,
+					"label": ""
+				},
+				{
+					"line": 29,
+					"column": 28,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "src/apis/index.ts",
+			"bookmarks": [
+				{
+					"line": 393,
+					"column": 21,
+					"label": ""
+				}
+			]
+		}
+	]
+}

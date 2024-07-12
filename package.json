@@ -9,7 +9,7 @@
 		"test": "craco test",
 		"eject": "react-scripts eject",
 		"predeploy": "npm run build",
-		"deploy": "gh-pages-clean gh-pages -d ./build"
+		"deploy": "gh-pages-clean && gh-pages -d ./build"
 	},
 	"eslintConfig": {
 		"extends": [

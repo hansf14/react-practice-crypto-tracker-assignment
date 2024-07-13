@@ -38,6 +38,19 @@ export const lightTheme: DefaultTheme = {
 	lineChartYAxisTickColor: "#fafafa",
 	lineChartYAxisBorderColor: "#fafafa",
 	lineChartYAxisLabelColor: "#fafafa",
+	candlestickChartFontFamily: `"Source Sans 3", sans-serif`,
+	candlestickChartBackgroundColor: "#5e6c87",
+	candlestickChartCandlestickColorUpward: "#00b746",
+	candlestickChartCandlestickColorDownward: "#f00",
+	// ㄴ ApexCharts 버그: "red"로 하면 stroke만 색이 적용되고, fill은 적용이 안 되는 버그가 있다.
+	candlestickChartXAxisTitleColor: "#fafafa",
+	candlestickChartXAxisTickColor: "#fafafa",
+	candlestickChartXAxisBorderColor: "#fafafa",
+	candlestickChartXAxisLabelColor: "#fafafa",
+	candlestickChartYAxisTitleColor: "#fafafa",
+	candlestickChartYAxisTickColor: "#fafafa",
+	candlestickChartYAxisBorderColor: "#fafafa",
+	candlestickChartYAxisLabelColor: "#fafafa",
 };
 
 export const darkTheme: DefaultTheme = {
@@ -78,4 +91,16 @@ export const darkTheme: DefaultTheme = {
 	lineChartYAxisTickColor: "#f5f5f5",
 	lineChartYAxisBorderColor: "#f5f5f5",
 	lineChartYAxisLabelColor: "#f5f5f5",
+	candlestickChartFontFamily: `"Source Sans 3", sans-serif`,
+	candlestickChartBackgroundColor: "#222",
+	candlestickChartCandlestickColorUpward: "#3fb27f",
+	candlestickChartCandlestickColorDownward: "#e84142",
+	candlestickChartXAxisTitleColor: "#f5f5f5",
+	candlestickChartXAxisTickColor: "#f5f5f5",
+	candlestickChartXAxisBorderColor: "#f5f5f5",
+	candlestickChartXAxisLabelColor: "#f5f5f5",
+	candlestickChartYAxisTitleColor: "#f5f5f5",
+	candlestickChartYAxisTickColor: "#f5f5f5",
+	candlestickChartYAxisBorderColor: "#f5f5f5",
+	candlestickChartYAxisLabelColor: "#f5f5f5",
 };

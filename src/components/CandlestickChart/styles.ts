@@ -1,18 +1,11 @@
-import styled, { css } from "styled-components";
-import { keyframes } from "styled-components";
+import styled from "styled-components";
 import { default as ApexChartBase } from "react-apexcharts";
 import { ApexChartProps } from "./types";
 
-export const LineChartPathAnimation = keyframes`
-	to {
-		stroke-dashoffset: 0;
-	}
-`;
-
-export const LineChart = styled.div`
+export const CandlestickChart = styled.div`
 	background-color: ${({ theme }) =>
-		theme.lineChartBackgroundColor
-			? theme.lineChartBackgroundColor
+		theme.candlestickChartBackgroundColor
+			? theme.candlestickChartBackgroundColor
 			: "transparent"};
 	padding: 30px 20px 10px 10px;
 `;
@@ -36,16 +29,5 @@ export const ApexChart = styled(ApexChartBase).withConfig({
 
 	.apexcharts-menu-icon {
 		transform: scale(1);
-	}
-
-	.apexcharts-series path {
-		${({ customProps }) =>
-			customProps?.pathLength !== undefined
-				? css`
-						stroke-dasharray: ${customProps.pathLength};
-						stroke-dashoffset: ${customProps.pathLength};
-				  `
-				: ""}
-		animation: ${LineChartPathAnimation} 1s linear forwards;
 	}
 `;

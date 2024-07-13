@@ -43,9 +43,11 @@ export const NavBarContent = styled.div`
 	gap: 15px;
 
 	width: 600px;
+	
 	@media (max-width: 650px) {
 		max-width: unset;
 		width: 100%;
+		padding: 0 15px;
 	}
 `;
 

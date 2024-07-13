@@ -143,9 +143,7 @@ const LineChart = React.memo(
 						width: 5,
 					},
 					yaxis: {
-						// show: false,
 						title: {
-							// text: "Traded Price",
 							offsetX: -5,
 							style: {
 								color: chartYAxisTitleColor,
@@ -161,7 +159,6 @@ const LineChart = React.memo(
 							color: chartYAxisTickColor,
 						},
 						labels: {
-							// show: false,
 							formatter: (value) => `$ ${value.toFixed(2)}`,
 							style: { colors: chartYAxisLabelColor },
 						},
@@ -171,9 +168,12 @@ const LineChart = React.memo(
 						},
 					},
 					xaxis: {
+						type: "datetime",
+						// type: "category",
 						title: {
 							text: "Time",
-							offsetY: -20,
+							offsetY: 5,
+							// offsetY: -20,
 							style: {
 								color: chartXAxisTitleColor,
 								fontFamily: chartFontFamily,
@@ -183,7 +183,6 @@ const LineChart = React.memo(
 						},
 						offsetX: 1,
 						axisBorder: {
-							// show: true,
 							show: false,
 							color: chartXAxisBorderColor,
 						},
@@ -192,9 +191,7 @@ const LineChart = React.memo(
 							offsetX: 1,
 							color: chartXAxisTickColor,
 						},
-						type: "category",
 						labels: {
-							// show: false,
 							offsetX: 0,
 							formatter: (timestamp) => {
 								// console.log(timestamp);

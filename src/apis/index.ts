@@ -232,6 +232,11 @@ export interface ICoinInfo {
 	}[];
 }
 
+export type ICoinOhlcTickers = ICoinOhlcTicker[];
+
+export type ICoinOhlcTicker = [number, number, number, number, number];
+// [timestamp, o, h, l, c]
+
 export interface IMarketData {
 	current_price: ICurrency;
 	total_value_locked: ICurrencyMinimal;
@@ -411,6 +416,7 @@ export interface RouteStateChart extends ICoinInfo {}
 export const FetchApiNamesArr = [
 	"fetch-coins-info",
 	"fetch-coin-info",
+	"fetch-coin-ohlc-tickers",
 ] as const;
 
 export type FetchApiName = (typeof FetchApiNamesArr)[number];
@@ -441,11 +447,13 @@ export type FetchApiNames = {
 export interface FetchApiParams {
 	"fetch-coins-info": null;
 	"fetch-coin-info": { coinId: string };
+	"fetch-coin-ohlc-tickers": { coinId: string };
 }
 
 export interface FetchApiReturnType {
 	"fetch-coins-info": Promise<ICoinMinimalInfo[]>;
 	"fetch-coin-info": Promise<ICoinInfo>;
+	"fetch-coin-ohlc-tickers": Promise<ICoinOhlcTickers>;
 }
 
 export interface FetchApiInfo {
@@ -502,19 +510,19 @@ export function getFetchApiInfo({
 		};
 	}
 
-	// _apiName = "fetch-coin-ohlc-info";
-	// if (apiName === _apiName) {
-	// 	const _apiParams = apiParams as FetchApiParams[typeof _apiName];
+	_apiName = "fetch-coin-ohlc-tickers";
+	if (apiName === _apiName) {
+		const _apiParams = apiParams as FetchApiParams[typeof _apiName];
 
-	// 	return {
-	// 		apiPrimary: {
-	// 			endpoint: `${BASE_URL}/${_apiParams.coinId}/ohlc`,
-	// 		},
-	// 		apiFallback: {
-	// 			endpoint: `${LOCAL_BASE_URL}/api/coin-ohlc/${_apiParams.coinId}.json`,
-	// 		},
-	// 	};
-	// }
+		return {
+			apiPrimary: {
+				endpoint: `${BASE_URL}/${_apiParams.coinId}/ohlc?days=1&vs_currency=usd`,
+			},
+			apiFallback: {
+				endpoint: `${LOCAL_BASE_URL}/api/coin-ohlc/${_apiParams.coinId}.json`,
+			},
+		};
+	}
 
 	return null;
 }
@@ -533,7 +541,7 @@ export async function fetchInfo({
 	apiName: FetchApiName;
 	apiParams: FetchApiParams[FetchApiName];
 }) {
-	console.log("[fetchInfo]");
+	// console.log("[fetchInfo]");
 
 	const options = {
 		method: "GET",

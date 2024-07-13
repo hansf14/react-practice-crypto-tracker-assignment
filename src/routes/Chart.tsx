@@ -12,9 +12,10 @@ import ErrorDescription from "@/components/ErrorDescription";
 import { dateStringToEpochTime, formatDate } from "@/utils/formatDate";
 import useLikeConstructor from "@/hooks/useLikeConstructor";
 import { default as LineChartBase } from "@/components/LineChart";
-import { LineChartProps } from "@/components/LineChart/types";
+import { ApexChartProps } from "@/components/LineChart/types";
 import styled from "styled-components";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { default as CandlestickChartBase } from "@/components/CandlestickChart";
 
 interface CompatibleTicker {
 	timestamp: number;
@@ -22,6 +23,10 @@ interface CompatibleTicker {
 }
 
 const LineChart = styled(LineChartBase)`
+	margin-top: 15px;
+`;
+
+const CandlestickChart = styled(CandlestickChartBase)`
 	margin-top: 15px;
 `;
 
@@ -65,35 +70,74 @@ function Chart() {
 	// console.log("state:", state);
 
 	const tickersRef = useRef<CompatibleTicker[]>([]);
-
 	useLikeConstructor(() => {
 		if (state) {
 			tickersRef.current = getChartCompatibleTickers(state);
 		}
 	});
+	// console.log("tickers:", tickersRef.current);
 
-	const { isLoading, data, isError, error } = useQuery(
-		["chart", coinId],
-		async () => {
-			const data = await fetchInfo({
-				apiName: "fetch-coin-info",
-				apiParams: { coinId },
-			});
-			tickersRef.current = getChartCompatibleTickers(data);
-			return tickersRef.current;
-		},
-		{
-			// initialData: state ?? undefined,
-		}
+	// const {
+	// 	isLoading: isLineChartLoading,
+	// 	data: lineChartData,
+	// 	isError: isLineChartError,
+	// 	error: lineChartError,
+	// } = useQuery(
+	// 	["fetch-coin-info", coinId],
+	// 	async () => {
+	// 		const data = await fetchInfo({
+	// 			apiName: "fetch-coin-info",
+	// 			apiParams: { coinId },
+	// 		});
+	// 		tickersRef.current = getChartCompatibleTickers(data);
+	// 		return tickersRef.current;
+	// 	},
+	// 	{
+	// 		initialData:
+	// 			tickersRef.current.length === 0 ? undefined : tickersRef.current,
+	// 	}
+	// );
+	// ㄴ 다른 페이지/라우트에서 이미 "fetch-coin-info"를 호출했고 캐시를 통해 데이터를 불러오게 되는 경우 `async () => ... ` 부분이 호출이 되지 않아서 `lineChartData`가 `getChartCompatibleTickers`를 통해 정제된 데이터가 아닌 캐시를 통해 불러오게 된 데이터 값을 가지게 된다. 이 경우 데이터의 타입이 다르게 되어 이 후 코드에서 에러가 생긴다.
+	// 해결) 아래 방법
+	const {
+		isLoading: isCoinInfoLoading,
+		data: coinInfoData,
+		isError: isCoinInfoError,
+		error: coinInfoError,
+	} = useQuery(["fetch-coin-info", coinId], () =>
+		fetchInfo({ apiName: "fetch-coin-info", apiParams: { coinId } })
 	);
+	const [stateLineChartData, setStateLineChartData] = useState<
+		CompatibleTicker[]
+	>([]);
+	const isLineChartLoading = isCoinInfoLoading;
+	const isLineChartError = isCoinInfoError;
+	const lineChartError = coinInfoError;
 
-	// console.log("state:", state);
-	// console.log(data);
-	console.log("tickers:", tickersRef.current);
+	useEffect(() => {
+		if (!coinInfoData) {
+			setStateLineChartData(tickersRef.current);
+			return;
+		}
+		tickersRef.current = getChartCompatibleTickers(coinInfoData);
+		setStateLineChartData(tickersRef.current);
+	}, [coinInfoData]);
+	// console.log("lineChartData:", stateLineChartData);
 
-	const lineChartCustomProps:
-		| LineChartProps["customProps"]["chartCustomProps"]
-		| null = data
+	const {
+		isLoading: isCandlestickChartLoading,
+		data: candlestickChartData,
+		isError: isCandlestickChartError,
+		error: candlestickChartError,
+	} = useQuery(["fetch-coin-ohlc-tickers", coinId], () =>
+		fetchInfo({
+			apiName: "fetch-coin-ohlc-tickers",
+			apiParams: { coinId },
+		})
+	);
+	console.log(candlestickChartData);
+
+	const lineChartCustomProps: ApexChartProps | null = stateLineChartData
 		? {
 				options: {
 					yaxis: {
@@ -101,7 +145,7 @@ function Chart() {
 							text: "Traded Price",
 						},
 						min: (min) => {
-							console.log(min);
+							// console.log(min);
 							// return min < 0 ? 0 : min;
 							return min < 1 ? 0 : min;
 						},
@@ -116,7 +160,7 @@ function Chart() {
 				series: [
 					{
 						name: "Price",
-						data: data.map((ticker) => {
+						data: stateLineChartData.map((ticker) => {
 							const { price, timestamp } = ticker;
 							// console.log(price);
 
@@ -130,15 +174,55 @@ function Chart() {
 		  }
 		: null;
 
+	const candlestickChartCustomProps: ApexChartProps | null =
+		candlestickChartData
+			? {
+					options: {
+						yaxis: {
+							title: {
+								text: "OHLC",
+							},
+							min: (min) => {
+								// console.log(min);
+								// return min < 0 ? 0 : min;
+								return min < 1 ? 0 : min;
+							},
+						},
+						xaxis: {
+							title: {
+								text: "Time",
+							},
+						},
+						// categories: data.map((ticker) => ticker.timestamp),
+					},
+					series: [
+						{
+							data: candlestickChartData,
+						},
+					],
+			  }
+			: null;
+
 	return (
 		<Section>
 			<SectionTitle>Price Chart Information</SectionTitle>
-			{isLoading ? (
+			{isLineChartLoading ? (
 				<Loader>Loading...</Loader>
-			) : isError ? (
-				<ErrorDescription customProps={{ error }} />
+			) : isLineChartError ? (
+				<ErrorDescription customProps={{ error: lineChartError }} />
 			) : lineChartCustomProps ? (
 				<LineChart customProps={{ chartCustomProps: lineChartCustomProps }} />
+			) : (
+				<UnknownLineChart>Unknown</UnknownLineChart>
+			)}
+			{isCandlestickChartLoading ? (
+				<Loader>Loading...</Loader>
+			) : isCandlestickChartError ? (
+				<ErrorDescription customProps={{ error: candlestickChartError }} />
+			) : candlestickChartCustomProps ? (
+				<CandlestickChart
+					customProps={{ chartCustomProps: candlestickChartCustomProps }}
+				/>
 			) : (
 				<UnknownLineChart>Unknown</UnknownLineChart>
 			)}

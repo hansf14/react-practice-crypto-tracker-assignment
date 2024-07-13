@@ -35,9 +35,21 @@ declare module "styled-components" {
 		lineChartXAxisTickColor: string;
 		lineChartXAxisBorderColor: string;
 		lineChartXAxisLabelColor: string;
-		lineChartYAxisTickColor: string;
+		lineChartYAxisTitleColor: string;
 		lineChartYAxisTickColor: string;
 		lineChartYAxisBorderColor: string;
 		lineChartYAxisLabelColor: string;
+		candlestickChartFontFamily: string;
+		candlestickChartBackgroundColor: string;
+		candlestickChartCandlestickColorUpward: string;
+		candlestickChartCandlestickColorDownward: string;
+		candlestickChartXAxisTitleColor: string;
+		candlestickChartXAxisTickColor: string;
+		candlestickChartXAxisBorderColor: string;
+		candlestickChartXAxisLabelColor: string;
+		candlestickChartYAxisTitleColor: string;
+		candlestickChartYAxisTickColor: string;
+		candlestickChartYAxisBorderColor: string;
+		candlestickChartYAxisLabelColor: string;
 	}
 }

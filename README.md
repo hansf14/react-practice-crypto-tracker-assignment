@@ -21,7 +21,7 @@
   </div>
 </p>
 
-<!-- - **Demo: [React Practice Crypto Tracker](https://hansf14.github.io/react-practice-crypto-tracker)**
+- **Demo: [React Practice Crypto Tracker Assignment](https://hansf14.github.io/react-practice-crypto-tracker-assignment)**
 - **Preview Screenshots**
 <p>
   <div>
@@ -38,6 +38,31 @@
     &emsp;
     <img width="300px" src="preview-screenshots/03.png" alt="03.png" />
   </div>
-</p> -->
+  &emsp;
+  <div>
+    &emsp;
+    <img width="300px" src="preview-screenshots/04.png" alt="04.png" />
+  </div>
+  &emsp;
+  <div>
+    &emsp;
+    <img width="300px" src="preview-screenshots/05.png" alt="05.png" />
+  </div>
+  &emsp;
+  <div>
+    &emsp;
+    <img width="300px" src="preview-screenshots/06.png" alt="06.png" />
+  </div>
+  &emsp;
+  <div>
+    &emsp;
+    <img width="300px" src="preview-screenshots/07.png" alt="07.png" />
+  </div>
+  &emsp;
+  <div>
+    &emsp;
+    <img width="300px" src="preview-screenshots/08.png" alt="08.png" />
+  </div>
+</p>
 
 <br/>
